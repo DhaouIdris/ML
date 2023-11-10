@@ -30,3 +30,18 @@ def save_replay(state, action, reward, state_, done):
     replaydones[index] = 1 - done
 
     memory_count+=1 
+
+
+def training_batch():
+    memsize = min(memory_count, MEMORY_SIZE)
+    batch_indices = np.random.choice(memsize, BATCH_SIZE, replace=True)
+    
+    states = replaystates[batch_indices]
+    actions = replayactions[batch_indices]
+    rewards = replayrewards[batch_indices]
+    states_ = replaystates_[batch_indices]
+    dones = replaydones[batch_indices]
+
+    return states, actions, rewards, states_, dones
+
+
