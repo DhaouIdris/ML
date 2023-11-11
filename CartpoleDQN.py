@@ -1,8 +1,13 @@
-
+import random as rd
 import math
 import numpy as np
 import gym
 import matplotlib.pyplot as plt
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import torch as T
+
 
 env = gym.make("CartPole-v1")
 
@@ -44,4 +49,24 @@ def training_batch():
 
     return states, actions, rewards, states_, dones
 
+class Network(nn.Module):
+    def __init__(self):
+        super().__init__()
 
+        self.fc1 = nn.Linear(4, 32)
+        self.fc2 = nn.Linear(32, 64)
+        self.fc3 = nn.Linear(64, 128)
+        self.fc4 = nn.Linear(128, 2)
+
+        self.optimizer = optim.Adam(self.parameters(), lr = learning_rate)
+        self.loss_function = nn.MSELoss()
+        self.to(DEVICE)
+
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
+
+        return x
