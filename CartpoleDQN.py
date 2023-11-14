@@ -82,3 +82,31 @@ best_score = 0
 average_score = 0
 avg_scores = []
 x_axis = []
+
+for i in range(1, N_EPISODES + 1):
+    current_state = env.reset()[0]
+    current_state = np.reshape(current_state, [1, env.observation_space.shape[0]])
+    score = 0
+
+    while True:
+        action = choose_action(current_state)
+        new_state, reward, done, trunc, _ = env.step(action)
+        new_state = np.reshape(new_state, [1, env.observation_space.shape[0]])
+        score+=reward
+        save_replay(current_state, action, reward, new_state, done or trunc)
+        learn()
+
+        if done or trunc:
+            if score > best_score: 
+                best_score = score
+            average_score += score
+            avg_scores.append(average_score/i)
+            x_axis.append(i)
+
+            
+            print("Episode {} Average Reward {} Best Reward {} Last Reward {} Epsilon {}".format(i, average_score/i, best_score, score, epsilon))
+
+            break
+
+        current_state = new_state
+
