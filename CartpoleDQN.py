@@ -9,6 +9,12 @@ import random as rd
 import gym
 import matplotlib.pyplot as plt
 
+DEVICE = 'cpu'
+
+learning_rate = 0.0001
+gamma = 0.95
+epsilon, epm, epd = 1, 0.01, 0.001
+X, cX = 10, 0
 
 env = gym.make("CartPole-v1")
 
@@ -71,3 +77,8 @@ class Network(nn.Module):
         x = self.fc4(x)
 
         return x
+
+best_score = 0
+average_score = 0
+avg_scores = []
+x_axis = []
