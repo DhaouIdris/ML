@@ -1,12 +1,13 @@
-import random as rd
-import math
-import numpy as np
-import gym
-import matplotlib.pyplot as plt
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import torch as T
+import math
+import numpy as np
+from copy import deepcopy as dc
+import random as rd
+import gym
+import matplotlib.pyplot as plt
 
 
 env = gym.make("CartPole-v1")
