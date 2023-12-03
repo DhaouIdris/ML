@@ -20,3 +20,6 @@ class DatasetTransformer(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.base_dataset)
+
+
+def get_dataloaders(config, use_cuda):
