@@ -110,4 +110,10 @@ def get_dataloaders(config, use_cuda):
         pin_memory=use_cuda,
     )
 
+    # test_loader  = torch.utils.data.DataLoader(test_dataset , batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+    X, _ = train_dataset[0]
+    input_size = tuple(X.shape)  # C, H, W
+
+    return train_loader, valid_loader, input_size, num_classes, classes, a, mean, std
 
