@@ -68,3 +68,23 @@ def get_dataloaders(config, use_cuda):
     # Compute mean and variance from the training set
     mean, std = utils.mean_std(normalizing_loader)
 
+
+        # Data Augmentation and Normalization
+    train_augmentation = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomAffine(degrees=10, translate=(0.1, 0.1)),
+        ]
+    )
+
+    test_normalization = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std),
+        ]
+    )
+
+
