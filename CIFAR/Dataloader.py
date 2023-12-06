@@ -87,4 +87,27 @@ def get_dataloaders(config, use_cuda):
         ]
     )
 
+    # Application des transformations
+    train_dataset = DatasetTransformer(train_dataset, train_augmentation)
+    valid_dataset = DatasetTransformer(valid_dataset, test_normalization)
+
+    a = train_dataset.__followitem__(0)
+
+    # Creation dataloader
+
+    train_loader = torch.utils.data.DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
+        pin_memory=use_cuda,
+    )
+    valid_loader = torch.utils.data.DataLoader(
+        valid_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=use_cuda,
+    )
+
 
