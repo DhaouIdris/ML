@@ -58,3 +58,13 @@ def get_dataloaders(config, use_cuda):
         dataset, [train_size, valid_size]
     )
 
+    # Creation d'un dataloader intermediaire afin de calculer la moyenne et l'ecart type de l'ensemble d'entrainement
+
+    normalizing_dataset = DatasetTransformer(train_dataset, transforms.ToTensor())
+    normalizing_loader = torch.utils.data.DataLoader(
+        dataset=normalizing_dataset, batch_size=batch_size, num_workers=num_workers
+    )
+
+    # Compute mean and variance from the training set
+    mean, std = utils.mean_std(normalizing_loader)
+
