@@ -1,3 +1,5 @@
+import torch
+import torch.nn as nn
 import yaml
 
 with open("Config.yaml", "r") as f:
@@ -15,3 +17,14 @@ def loss_function(config):
     loss_fct = config["loss"]
     loss = eval(f"nn.{loss_fct}()")
     return loss
+
+if __name__ == "__main__":
+
+    model_parameters_exemple = [
+        torch.nn.Parameter(torch.Tensor([[1.0, 2.0], [3.0, 4.0]])),
+        torch.nn.Parameter(torch.Tensor([5.0, 6.0])),
+        torch.nn.Parameter(torch.Tensor([7.0])),
+    ]
+
+    optimizer_test = get_optimizer(config, model_parameters_exemple)
+    loss_test = loss_function(config)
