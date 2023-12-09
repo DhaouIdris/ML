@@ -28,13 +28,13 @@ regularisation:
 logging:
   wandb:
     #project: cifar-100-projet-CSMETZ
-    project: my-awesome-project
-    entity: cifar23
-    run_name: schedulertesting_SGD50epochs_lrE-3
-  logdir: "./logs" # Better to provide the fullpath, especially on the cluster
+    #project: my-awesome-project
+    #entity: cifar23
+    #run_name: schedulertesting_SGD50epochs_lrE-3
+  #logdir: "./logs" # Better to provide the fullpath, especially on the cluster
 # model:
 #   class: Linear
 
 model:
-  class: VGG_S11
+  class: Linear
   num_layers: 4
