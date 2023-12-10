@@ -134,3 +134,34 @@ def test_loading_test():
     print(f"The loaded input size is {inputsize}, with {numclasses} classes")
     print(f"The classes are {classes}")
 
+
+
+def test_show_image():
+    # read yaml file
+    with open("classification-cifar-100/Config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    (
+        train_loader,
+        valid_loader,
+        input_size,
+        num_classes,
+        classes,
+        a,
+        mean,
+        std,
+    ) = get_dataloaders(config, True)
+    imgs, labels = next(iter(train_loader))
+    fig = plt.figure(figsize=(20, 5), facecolor="w")
+    for i in range(10):
+        ax = plt.subplot(1, 10, i + 1)
+        plt.imshow(imgs[i, 0, :, :], vmin=0, vmax=1.0, cmap=cm.gray)
+        ax.set_title("{}".format(classes[labels[i]]), fontsize=15)
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+    plt.savefig("CIFAR100_samples.png", bbox_inches="tight")
+    plt.show()
+
+
+
+
