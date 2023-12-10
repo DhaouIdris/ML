@@ -117,3 +117,20 @@ def get_dataloaders(config, use_cuda):
 
     return train_loader, valid_loader, input_size, num_classes, classes, a, mean, std
 
+
+def test_loading_test():
+    with open("\classification-cifar-100\Config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+    (
+        train_lod,
+        valid_lod,
+        inputsize,
+        numclasses,
+        classes,
+        a,
+        mean,
+        std,
+    ) = get_dataloaders(config, False)
+    print(f"The loaded input size is {inputsize}, with {numclasses} classes")
+    print(f"The classes are {classes}")
+
