@@ -43,25 +43,29 @@ def train(config):
 
 
        # build a moodel
-    logging.info("= Building the model")
-    modell= models.build_model(config, inputsize, numclasses)
-    modell = modell.to(device)
+   logging.info("= Building the model")
+   modell= models.build_model(config, inputsize, numclasses)
+   modell = modell.to(device)
 
     # build a optimizer, loss
-    logging.info("= Building the loss function")
-    loss = Optim_Loss.loss_function(config)
+   logging.info("= Building the loss function")
+   loss = Optim_Loss.loss_function(config)
 
-    logging.info("= Building the optimizers")
-    optim = Optim_Loss.get_optimizer(config, modell.parameters())
-    scheduler=Optim_Loss.get_scheduler(optim)
-    # définition du checkpoint
-    logging.info("= Building the checkpoint")
+   logging.info("= Building the optimizers")
+   optim = Optim_Loss.get_optimizer(config, modell.parameters())
+   scheduler=Optim_Loss.get_scheduler(optim)
+   # définition du checkpoint
+   logging.info("= Building the checkpoint")
 
        # définition du checkpoint
-    logging.info("= Building the checkpoint")
+   logging.info("= Building the checkpoint")
 
-    logdir = utils.generate_unique_logpath(
+   logdir = utils.generate_unique_logpath(
         config["logging"]["logdir"], config["model"]["class"]
     )
 
+
+   if not os.path.exists(logdir):
+      os.makedirs(logdir)
+   model_checkpoint = utils.ModelCheckpoint(modell, logdir + "/best_model.pt")
 
