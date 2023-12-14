@@ -42,3 +42,18 @@ def train(config):
    ) = dataloader.get_dataloaders(config, False)
 
 
+       # build a moodel
+    logging.info("= Building the model")
+    modell= models.build_model(config, inputsize, numclasses)
+    modell = modell.to(device)
+
+    # build a optimizer, loss
+    logging.info("= Building the loss function")
+    loss = Optim_Loss.loss_function(config)
+
+    logging.info("= Building the optimizers")
+    optim = Optim_Loss.get_optimizer(config, modell.parameters())
+    scheduler=Optim_Loss.get_scheduler(optim)
+    # définition du checkpoint
+    logging.info("= Building the checkpoint")
+
