@@ -57,3 +57,11 @@ def train(config):
     # définition du checkpoint
     logging.info("= Building the checkpoint")
 
+       # définition du checkpoint
+    logging.info("= Building the checkpoint")
+
+    logdir = utils.generate_unique_logpath(
+        config["logging"]["logdir"], config["model"]["class"]
+    )
+
+
