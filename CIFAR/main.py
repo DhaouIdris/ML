@@ -7,9 +7,11 @@ import yaml
 import torch
 import torchinfo.torchinfo as torchinfo
 
+import models
 import Optim_Loss
 import dataloader
 import utils
+
 
 
 
@@ -21,11 +23,6 @@ def train(config):
    logging.info("= Building the dataloaders")
    train_lod, valid_lod, inputsize, numclasses, classes = dataloader.get_dataloaders(config, False)
    model = config["model"]["class"]
-
-   epochs = config['nepochs']
-      for _ in range(epochs):
-         train_loss = utils.train(model, loss, optim, device, train_lod)
-         valid_loss = utils.test(model, loss, device, valid_lod)
 
 
        # creer un datalaoder a parti du fichier config
@@ -63,9 +60,12 @@ def train(config):
    logdir = utils.generate_unique_logpath(
         config["logging"]["logdir"], config["model"]["class"]
     )
-
-
+  
    if not os.path.exists(logdir):
       os.makedirs(logdir)
    model_checkpoint = utils.ModelCheckpoint(modell, logdir + "/best_model.pt")
 
+   epochs = config['nepochs']
+   for _ in range(epochs):
+      train_loss = utils.train(model, loss, optim, device, train_lod)
+      valid_loss = utils.test(model, loss, device, valid_lod)
