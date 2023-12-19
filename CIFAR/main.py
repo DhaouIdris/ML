@@ -2,6 +2,8 @@ import logging
 import sys
 import os
 import pathlib
+import torch.nn.functional as F
+import torch.nn as nn
 
 import yaml
 import torch
@@ -65,7 +67,23 @@ def train(config):
       os.makedirs(logdir)
    model_checkpoint = utils.ModelCheckpoint(modell, logdir + "/best_model.pt")
 
+    early_stopping_patience = config["training"].get("early_stopping_patience", 8)  # default to 8 if not in config
+    epochs_without_improvement = 0
+
+
    epochs = config['nepochs']
    for _ in range(epochs):
       train_loss = utils.train(model, loss, optim, device, train_lod)
       valid_loss = utils.test(model, loss, device, valid_lod)
+
+        # Check for early stopping condition
+        if model_checkpoint.min_loss < old_min_loss:
+            epochs_without_improvement = 0  # reset counter
+        else:
+            epochs_without_improvement += 1
+
+        if epochs_without_improvement >= early_stopping_patience:
+            print("Early stopping due to no improvement after", early_stopping_patience, "epochs.")
+            break
+
+   utils.plot_confusion_matrix(modell, valid_lod, classes, device)
