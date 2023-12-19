@@ -87,3 +87,18 @@ def train(config):
             break
 
    utils.plot_confusion_matrix(modell, valid_lod, classes, device)
+
+
+if __name__ == "__main__":
+
+    if len(sys.argv) not in [1, 2]:
+        print(f"Usage : {sys.argv[0]} <Config.yaml>")
+        sys.exit(-1)
+
+    if len(sys.argv) == 2:
+        configpath = sys.argv[1]
+    else:
+        configpath = "Config.yaml"
+
+    config = yaml.safe_load(open(configpath, "r"))
+    train(config)
