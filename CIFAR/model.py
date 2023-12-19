@@ -30,6 +30,15 @@ def test_linear():
     output = model(input_tensor)
     print(f"Output tensor of size : {output.shape}")
 
+class LinearNet(nn.Module):
+    def __init__(self, cfg, input_size, num_classes):
+        super(LinearNet, self).__init__()
+        self.input_size = reduce(operator.mul, input_size, 1)
+        self.classifier = nn.Linear(self.input_size, num_classes)
 
-if __name__ == "__main__":
-    test_linear()
+    def forward(self, x):
+        x = x.view(x.size()[0], -1)
+        y = self.classifier(x)
+        return y
+
+
