@@ -3,7 +3,7 @@ import torch.nn as nn
 from functools import reduce
 import torch.nn.functional as F
 import operator
-
+from torchvision import models
 
 
 
