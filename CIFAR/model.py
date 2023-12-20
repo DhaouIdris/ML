@@ -103,3 +103,20 @@ class ResNet101(torch.nn.Module):
         return self.resnet(x)
 
 
+class VGG11(torch.nn.Module):
+    def __init__(self, config, input_size, num_classes):
+        super(VGG11, self).__init__()
+        self.vgg = models.vgg11(pretrained=True)
+
+        # Modify the first layer to accept 3-channel 32x32 input
+        self.vgg.features[0] = torch.nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+
+        # Modify the output layer to match the number of classes
+        num_features = self.vgg.classifier[6].in_features
+        self.vgg.classifier[6] = torch.nn.Linear(num_features, num_classes)
+
+    def forward(self, x):
+        return self.vgg(x)
+
+
+
