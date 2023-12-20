@@ -61,3 +61,25 @@ class ConvNet(nn.Module):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
         return x
+
+
+
+
+class ResNet18(torch.nn.Module):
+    def __init__(self, config, input_size, num_classes):
+        super(ResNet18, self).__init__()
+        self.resnet = models.resnet18(pretrained=True)
+
+        # Modify the first layer to accept 3-channel 32x32 input
+        self.resnet.conv1 = torch.nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+
+        # Modify the average pooling layer to handle smaller input
+        self.resnet.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
+        
+        # Modify the output layer to match the number of classes
+        num_features = self.resnet.fc.in_features
+        self.resnet.fc = torch.nn.Linear(num_features, num_classes)  # CIFAR-100 has 100 classes
+
+    def forward(self, x):
+        return self.resnet(x)
+
