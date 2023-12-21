@@ -211,3 +211,9 @@ class VGG16(nn.Module):
         return out
 
 
+def conv_relu_bn(cin, cout):
+    return [
+        nn.Conv2d(cin, cout, kernel_size=3, stride=1, padding=1),
+        nn.ReLU(),
+        nn.BatchNorm2d(cout),
+    ]
