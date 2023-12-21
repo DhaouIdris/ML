@@ -217,3 +217,12 @@ def conv_relu_bn(cin, cout):
         nn.ReLU(),
         nn.BatchNorm2d(cout),
     ]
+
+
+def conv_down(cin, cout):
+    return [
+        nn.Conv2d(cin, cout, kernel_size=2, stride=2, padding=0),
+        nn.ReLU(),
+        nn.BatchNorm2d(cout),
+    ]
+
