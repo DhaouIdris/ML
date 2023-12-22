@@ -287,3 +287,66 @@ def VanillaCNN(cfg, input_size, num_classes):
     num_features = reduce(operator.mul, out_cnn.shape[1:], 1)
     out_layers = [nn.Flatten(start_dim=1), nn.Linear(num_features, num_classes)]
     return nn.Sequential(conv_model, *out_layers)
+
+
+class DenseNet201(nn.Module):
+    def __init__(self,cfg,input_size,num_classes=100):
+        super(DenseNet201, self).__init__()
+        self.growth_rate = 32
+        block_config=(3, 3, 3, 3)
+        num_init_features = 64
+        self.num_features=num_init_features
+        self.features = nn.Sequential(
+            nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False),
+            nn.BatchNorm2d(num_init_features),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        )
+
+        
+        self._make_dense_layers(block_config)
+
+        self.classifier = nn.Linear(self.num_features, num_classes)
+
+    def _make_dense_layers(self, block_config):
+        num_dense_blocks = len(block_config)
+
+        for i, num_layers in enumerate(block_config):
+            block = self._make_dense_block(num_layers )
+            self.features.add_module(f'denseblock{i + 1}', block)
+            self.num_features += num_layers * self.growth_rate
+
+            if i != num_dense_blocks - 1:
+                trans = self._make_transition()
+                self.features.add_module(f'transition{i + 1}', trans)
+                self.num_features = self.num_features // 2
+        self.features.add_module('norm5', nn.BatchNorm2d(self.num_features))
+
+    def _make_dense_block(self, num_layers):
+        layers = []
+        for i in range(num_layers):
+            layer = self._make_dense_layer(self.num_features + i * self.growth_rate)
+            layers.append(layer) 
+        return nn.Sequential(*layers)
+
+    def _make_dense_layer(self,num_features):
+        return nn.Sequential(
+            nn.BatchNorm2d(num_features),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(num_features, num_features + self.growth_rate, kernel_size=3, stride=1, padding=1, bias=False),
+        )
+
+    def _make_transition(self):
+        return nn.Sequential(
+            nn.BatchNorm2d(self.num_features), 
+            nn.ReLU(inplace=True),
+            nn.Conv2d(self.num_features, self.num_features // 2, kernel_size=1, stride=1, bias=False),
+            nn.AvgPool2d(kernel_size=2, stride=2)
+        )
+
+    def forward(self, x):
+        features = self.features(x)
+        out = nn.functional.adaptive_avg_pool2d(features, (1, 1)).view(features.size(0), -1)
+        out = self.classifier(out)
+        return out
+
