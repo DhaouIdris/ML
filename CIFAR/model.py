@@ -63,6 +63,48 @@ class ConvNet(nn.Module):
         return x
 
 
+class CustomCNN(nn.Module):
+    def __init__(self, config, input_size, num_classes):
+        super(CustomCNN, self).__init__()
+
+        layers = []
+        cin = input_size[0]
+        cout = 8
+        growth_rate = config["model"]["growth_rate"]
+        for i in range(config["model"]["num_blocks"]):
+            if i == 0:
+                layers.append(nn.Conv2d(3, 8, kernel_size=3, stride=1, padding=1))
+                layers.append(nn.ReLU())
+                layers.append(nn.Conv2d(8, 8, kernel_size=3, stride=1, padding=1))
+                layers.append(nn.ReLU())
+                layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+                cin = 8
+                cout = cin*growth_rate
+            else:
+                layers.append(nn.Conv2d(cin, cout, kernel_size=3, stride=1, padding=1))
+                layers.append(nn.ReLU())
+                layers.append(nn.Conv2d(cout, cout, kernel_size=3, stride=1, padding=1))
+                layers.append(nn.ReLU())                                
+                layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+                cin, cout = cin*growth_rate, cout*growth_rate
+
+        self.layers = nn.Sequential(*layers)
+
+        dummy_tensor = torch.zeros([1, *input_size])
+        dummy_tensor = self.layers(dummy_tensor)
+        classifier_input_dim = dummy_tensor.shape[1]*dummy_tensor.shape[2]*dummy_tensor.shape[3]
+
+        self.classifier = nn.Linear(classifier_input_dim, num_classes)
+
+    def forward(self, x):
+        x = self.layers(x)
+        
+        # flatten the output from the convolutional layers
+        x = x.view(x.size(0), -1)
+        
+        x = self.classifier(x)
+        return x
+
 
 
 class ResNet18(torch.nn.Module):
