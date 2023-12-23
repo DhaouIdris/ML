@@ -22,6 +22,33 @@ def train(config):
    use_cuda = torch.cuda.is_available()
    device = torch.device("cuda") if use_cuda else torch.device("cpu")
 
+# start a new wandb run to track this script
+   if "wandb" in config["logging"]:
+        wandb_config = config["logging"]["wandb"]
+        run_name = wandb_config.get("run_name", None)  # retrieve run name from config
+
+        # Check if run_name exists in the configuration file
+        if run_name is None:
+            logging.warning("Run name not specified in the configuration file. A random name will be used.")
+            run_name = wandb.util.generate_id()  # generate a random name
+
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project=wandb_config["project"],
+            # set the wandb group
+            entity=wandb_config["entity"],
+            # set the wandb run name
+            name=run_name,
+        )
+        wandb_log = wandb.log
+        logging.info("= Set up the dashboard")
+
+        # Save the configuration in Wandb
+        wandb.config.update(config)
+    else:
+        wandb_log = None
+
+   
    logging.info("= Building the dataloaders")
    train_lod, valid_lod, inputsize, numclasses, classes = dataloader.get_dataloaders(config, False)
    model = config["model"]["class"]
