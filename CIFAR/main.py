@@ -113,7 +113,20 @@ def train(config):
             print("Early stopping due to no improvement after", early_stopping_patience, "epochs.")
             break
 
+        # log metrics to wandb
+        wandb.log(
+            {"train_loss": train_loss, "valid_loss": valid_loss, "accuracy": accuracy}
+        )
+
+
    utils.plot_confusion_matrix(modell, valid_lod, classes, device)
+
+
+    # enregistrement du meilleur modèle
+    wandb.save(logdir + "/best_model.pt")
+
+    # finish the wandb run
+    wandb.finish()
 
 
 if __name__ == "__main__":
