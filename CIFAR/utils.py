@@ -58,3 +58,9 @@ def plot_confusion_matrix(modell, valid_lod, classes):
     plt.savefig("confusion_matrix.png")
 
 
+
+    # Wandb 
+    wandb.log({"confusion_matrix": wandb.Image(plt)})
+
+
+
