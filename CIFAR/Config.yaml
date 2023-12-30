@@ -36,5 +36,5 @@ logging:
 #   class: Linear
 
 model:
-  class: ResNet18
+  class: VGG16
   num_layers: 4
