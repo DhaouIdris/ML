@@ -15,3 +15,17 @@ hps = {'connectivity': 0.4,
 
 my_rc = RcNetwork(**hps, random_state = 210, feedback = True, activation_function= "relu")
 my_rc.fit(y = target_train) #training
+
+#prediction
+score, prediction = my_rc.test(y = target_test)
+my_rc.combined_plot()
+
+my_rc = RcNetwork(**hps, random_state = 210, activation_function: str = "relu", feedback = True)
+
+# #fitting the data:
+my_rc.fit(X = force_train, y = target_train)
+
+'''
+#prediction
+score, prediction = my_rc.test(X = force_test, y = target_test)
+my_rc.combined_plot() '''
