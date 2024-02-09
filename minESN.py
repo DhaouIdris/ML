@@ -14,4 +14,11 @@ class RC(nn.Module):
         self.reservoir = nn.Linear(reservoir_size, reservoir_size, bias=False)
         self.output_weights = nn.Linear(reservoir_size, output_size)
 
+    def forward(self, x):
+        x = torch.tanh(self.input_weights(x))
+        for _ in range(100):
+            x = torch.tanh(self.reservoir(x))
+        return self.output_weights(x)
+
+
 env = gym.make("CartPole-v1")
