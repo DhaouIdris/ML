@@ -46,3 +46,16 @@ for episode in range(1000):
         
         next_state, action, reward, done, _ = env.step(action)
         total_reward += reward
+
+        target = torch.tensor([action], dtype=torch.long)
+        loss = criterion(action_probs, target)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        state = next_state
+        
+        if done:
+            break
+    
+    print("Episode: {}, Total reward: {}".format(episode, total_reward))
