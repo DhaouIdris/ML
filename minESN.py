@@ -22,3 +22,11 @@ class RC(nn.Module):
 
 
 env = gym.make("CartPole-v1")
+
+state_space = env.observation_space.shape[0]
+action_space = env.action_space.n
+
+rc = RC(input_size=state_space, reservoir_size=128, output_size=action_space)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(rc.parameters(), lr=0.001)
