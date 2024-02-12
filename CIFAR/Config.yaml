@@ -1,6 +1,6 @@
 data:
-  dataset: "CIFAR100"
-  trainpath: "/usr/users/s8cifar/neaum/Bureau/classification-cifar-100/opt/Datasets"
+  dataset: "CIFAR10"
+  trainpath: "/usr/users/s8cifar/neaum/Bureau/classification-cifar-10/opt/Datasets"
   # testpath: '/dummy/path/to/test'
   batch_size: 256
   num_workers: 4
