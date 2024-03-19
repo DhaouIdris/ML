@@ -1,7 +1,8 @@
 #Imports
 import os
 import pandas as pd
-
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 # Load datasets
@@ -26,3 +27,25 @@ train_datagen = ImageDataGenerator(rescale = 1./255,
                                    horizontal_flip = True)
 
 test_datagen = ImageDataGenerator(rescale = 1./255)
+
+
+train_generator = train_datagen.flow_from_dataframe(
+    dataframe=train_df,
+    directory=None,
+    x_col='relative_im_path',
+    y_col='class',
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical'
+)
+
+
+test_generator = test_datagen.flow_from_dataframe(
+    dataframe=test_df,
+    directory=None,
+    x_col='relative_im_path',
+    y_col='class',
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical'
+)
