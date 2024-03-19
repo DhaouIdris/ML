@@ -1,6 +1,9 @@
 #Imports
 import os
 import pandas as pd
+from tensorflow.keras.models import load_model, Sequential, Model
+from tensorflow.keras.layers import Input, Lambda, Dense, Flatten
+from tensorflow.keras.applications.vgg16 import preprocess_input, VGG16
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -49,3 +52,24 @@ test_generator = test_datagen.flow_from_dataframe(
     batch_size=32,
     class_mode='categorical'
 )
+
+
+#Classification
+
+#Model config
+IMAGE_SIZE = [224, 224]
+vgg = VGG16(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
+
+#Transfer Learning
+
+#freeze the base layers:
+for layer in vgg.layers:
+    layer.trainable = False
+
+# Add new layers on top of the pretrained base
+x = Flatten()(vgg.output)
+
+prediction = Dense(196, activation='softmax')(x)
+
+model = Model(inputs=vgg.input, outputs=prediction)
+
