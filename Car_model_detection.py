@@ -81,3 +81,14 @@ model.compile(
   metrics=['accuracy']
 )
 
+
+#Training 
+
+r = model.fit_generator(
+  train_generator,
+  validation_data=test_generator,
+  epochs=30,
+  steps_per_epoch=len(train_generator),
+  validation_steps=len(test_generator)
+)
+
