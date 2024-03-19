@@ -18,4 +18,11 @@ test_df['class'] = test_df['class'].astype(str)
 train_df.to_csv('updated_train.csv', index=False)
 test_df.to_csv('updated_test.csv', index=False)
 
+#DataGen
 
+train_datagen = ImageDataGenerator(rescale = 1./255,
+                                   shear_range = 0.2,
+                                   zoom_range = 0.2,
+                                   horizontal_flip = True)
+
+test_datagen = ImageDataGenerator(rescale = 1./255)
