@@ -73,3 +73,5 @@ prediction = Dense(196, activation='softmax')(x)
 
 model = Model(inputs=vgg.input, outputs=prediction)
 
+print(model.summary())
+
