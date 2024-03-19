@@ -75,3 +75,9 @@ model = Model(inputs=vgg.input, outputs=prediction)
 
 print(model.summary())
 
+model.compile(
+  loss='categorical_crossentropy',
+  optimizer='adam',
+  metrics=['accuracy']
+)
+
