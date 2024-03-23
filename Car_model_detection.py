@@ -108,7 +108,8 @@ plt.show()
 plt.savefig('AccVal_acc')
 
 
-
+#Saving the model
+model.save('model_vgg.h5')
 
 
 
