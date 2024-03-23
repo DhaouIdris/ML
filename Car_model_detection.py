@@ -116,4 +116,22 @@ model.save('model_vgg.h5')
 #Model Loading
 model1 = YOLO('yolov8n.pt')
 
+#calculate the area for a box
+def calculate_box_area(box):
+    return (box[2] - box[0]) * (box[3] - box[1])
 
+#choosing only the biggest box given a list of boxes by size
+def filter_largest_box(boxes):
+    if not boxes:
+        return None
+
+    biggest_box = boxes[0]
+    max_area = calculate_box_area(biggest_box)
+
+    for box in boxes[1:]:
+        area = calculate_box_area(box)
+        if area > max_area:
+            max_area = area
+            biggest_box = box
+
+    return biggest_box
