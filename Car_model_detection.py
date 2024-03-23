@@ -112,6 +112,8 @@ plt.savefig('AccVal_acc')
 model.save('model_vgg.h5')
 
 
-
+#Object detection 
+#Model Loading
+model1 = YOLO('yolov8n.pt')
 
 
