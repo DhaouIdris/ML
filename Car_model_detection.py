@@ -160,4 +160,8 @@ def draw_bounding_box(image_path, box, title):
     plt.show()
 
 
+#Loading the dictionnary for the cars models name
+with open('class_names_dict.pkl', 'rb') as file:
+    models = pickle.load(file)
 
+print(list(models.keys())[list(models.values()).index(58)])
