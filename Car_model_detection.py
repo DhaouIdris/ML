@@ -175,3 +175,41 @@ print(boxes)
 print(largest_box)
 
 draw_bounding_box(img, largest_box,f"{list(models.keys())[list(models.values()).index(train_df['class'][100])]}")
+
+
+
+def main(img1, img2):
+
+  img1=image.load_img('img1',target_size=(224,224))
+  img2=image.load_img('img2',target_size=(224,224))
+  img1=image.img_to_array(img1)/255
+  img2=image.img_to_array(img2)/255
+
+  img1=np.expand_dims(img1,axis=0)
+  img1_data=preprocess_input(img1)
+  img1_data.shape
+  img2=np.expand_dims(img2,axis=0)
+  img2_data=preprocess_input(img2)
+  img2_data.shape
+
+
+  if np.argmax(model.predict(img1_data), axis=1)==np.argmax(model.predict(img2_data), axis=1):
+    print(f'The cars are the same model: {list(models.keys())[list(models.values()).index(np.argmax(model.predict(img1_data), axis=1)+1)]}') #We ranges the labels from 0 to 195 but it is from 1 to 196 in the dictionnary
+  else:
+    print('The cars are different models')
+
+  results1 = model1(img1, show = False)
+  boxes = results[0].boxes.xyxy.tolist()
+  largest_box = filter_largest_box(boxes)
+  draw_bounding_box(img, largest_box, f'First car model :{list(models.keys())[list(models.values()).index(np.argmax(model.predict(img1_data), axis=1)+1)]}')
+  print("Coordinates of the box of the first car:")
+  print(f"x1: {largest_box[0]}, y1: {largest_box[1]}")
+  print(f"x2: {largest_box[2]}, y2: {largest_box[3]}")
+
+  results = model1(img1, show = False)
+  boxes = results[0].boxes.xyxy.tolist()
+  largest_box = filter_largest_box(boxes)
+  draw_bounding_box(img, largest_box, f'Second car model :{list(models.keys())[list(models.values()).index(np.argmax(model.predict(img2_data), axis=1)+1)]}')
+  print("Coordinates of the box of the second car:")
+  print(f"x1: {largest_box[0]}, y1: {largest_box[1]}")
+  print(f"x2: {largest_box[2]}, y2: {largest_box[3]}")
