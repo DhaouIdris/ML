@@ -165,3 +165,13 @@ with open('class_names_dict.pkl', 'rb') as file:
     models = pickle.load(file)
 
 print(list(models.keys())[list(models.values()).index(58)])
+
+
+img = train_df['relative_im_path'][100]
+results = model1(img, show = False)
+boxes = results[0].boxes.xyxy.tolist()
+largest_box = filter_largest_box(boxes)
+print(boxes)
+print(largest_box)
+
+draw_bounding_box(img, largest_box,f"{list(models.keys())[list(models.values()).index(train_df['class'][100])]}")
