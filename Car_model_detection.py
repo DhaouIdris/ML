@@ -135,3 +135,29 @@ def filter_largest_box(boxes):
             biggest_box = box
 
     return biggest_box
+
+
+#drawing the box on the jpg
+def draw_bounding_box(image_path, box, title):
+    image = plt.imread(image_path)
+
+    fig, ax = plt.subplots(1)
+    ax.imshow(image)
+
+    rect = patches.Rectangle(
+        (box[0], box[1]),
+        box[2] - box[0],
+        box[3] - box[1],
+        linewidth=2,
+        edgecolor='r',
+        facecolor='none'
+    )
+
+
+    ax.add_patch(rect)
+
+    plt.title(title)
+    plt.show()
+
+
+
