@@ -20,7 +20,15 @@ class Solution:
         initial_weights: NDArray[np.float64]
     ) -> NDArray[np.float64]:
 
+
         # you will need to call get_derivative() for each weight
         # and update each one separately based on the learning rate!
         # return np.round(your_answer, 5)
-        pass
+
+        for i in range(num_iterations):
+            X_pred = self.get_model_prediction(X, initial_weights)
+            for j in range(len(initial_weights)):
+                d = self.get_derivative(X_pred, Y, len(X), X, j)
+                initial_weights[j]-= d*self.learning_rate
+
+        return np.round(initial_weights, 5)
