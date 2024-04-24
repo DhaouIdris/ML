@@ -16,8 +16,7 @@ class Solution:
         return torch.reshape(to_reshape, (L[0]*L[1]//2, 2))
 
     def average(self, to_avg: TensorType[float]) -> TensorType[float]:
-        # torch.mean() will be useful - check out the documentation
-        pass
+        return torch.mean(to_avg, 0)
 
     def concatenate(self, cat_one: TensorType[float], cat_two: TensorType[float]) -> TensorType[float]:
         # torch.cat() will be useful - check out the documentation
