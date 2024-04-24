@@ -19,8 +19,7 @@ class Solution:
         return torch.mean(to_avg, 0)
 
     def concatenate(self, cat_one: TensorType[float], cat_two: TensorType[float]) -> TensorType[float]:
-        # torch.cat() will be useful - check out the documentation
-        pass
+        return torch.cat((cat_one, cat_two), 1)
 
     def get_loss(self, prediction: TensorType[float], target: TensorType[float]) -> TensorType[float]:
         # torch.nn.functional.mse_loss() will be useful - check out the documentation
