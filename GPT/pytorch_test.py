@@ -2,13 +2,6 @@ import torch
 import torch.nn
 from torchtyping import TensorType
 
-# Helpful functions:
-# https://pytorch.org/docs/stable/generated/torch.reshape.html
-# https://pytorch.org/docs/stable/generated/torch.mean.html
-# https://pytorch.org/docs/stable/generated/torch.cat.html
-# https://pytorch.org/docs/stable/generated/torch.nn.functional.mse_loss.html
-
-# Round your answers to 4 decimal places using torch.round(input_tensor, decimals = 4)
 class Solution:
     def reshape(self, to_reshape: TensorType[float]) -> TensorType[float]:
         # torch.reshape() will be useful - check out the documentation
@@ -22,5 +15,4 @@ class Solution:
         return torch.cat((cat_one, cat_two), 1)
 
     def get_loss(self, prediction: TensorType[float], target: TensorType[float]) -> TensorType[float]:
-        # torch.nn.functional.mse_loss() will be useful - check out the documentation
-        pass
+        return torch.nn.functional.mse_loss(prediction, target)
