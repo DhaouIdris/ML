@@ -16,3 +16,16 @@ class Solution:
 
     def get_loss(self, prediction: TensorType[float], target: TensorType[float]) -> TensorType[float]:
         return torch.nn.functional.mse_loss(prediction, target)
+
+
+class Solution(nn.Module):
+    def __init__(self):
+        super().__init__()
+        torch.manual_seed(0)
+        pass
+        # Define the architecture here
+    
+    def forward(self, images: TensorType[float]) -> TensorType[float]:
+        torch.manual_seed(0)
+        pass
+        # Return the model's prediction to 4 decimal places
