@@ -24,12 +24,15 @@ class Solution(nn.Module):
         torch.manual_seed(0)
         pass
         # Define the architecture here
-        first_layer = nn.Linear(28*28, 512)
-        second_layer = nn.Dropout(0,2)
-        final_layer = nn.Linear(512, 10)
+        self.first_layer = nn.Linear(28*28, 512)
+        self.second_layer = nn.Dropout(0,2)
+        self.relu = nn.ReLU()
+        self.third_layer = nn.Linear(512, 10)
+        self.sigmoid = nn.Sigmoid()
     
     def forward(self, images: TensorType[float]) -> TensorType[float]:
         torch.manual_seed(0)
         pass
         # Return the model's prediction to 4 decimal places
-        return self.final_layer(self.second_layer(nn.functional.relu(self.first_layer(images))))
+        output = self.final_layer(self.third_layer(self.second_layer(nn.relu(self.first_layer(images)))))
+        
