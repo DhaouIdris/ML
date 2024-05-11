@@ -24,6 +24,8 @@ class Solution(nn.Module):
         torch.manual_seed(0)
         pass
         # Define the architecture here
+        first_layer = nn.Linear(28*28, 512)
+        second_layer = nn.Dropout(0,2)
     
     def forward(self, images: TensorType[float]) -> TensorType[float]:
         torch.manual_seed(0)
