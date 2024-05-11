@@ -35,4 +35,5 @@ class Solution(nn.Module):
         pass
         # Return the model's prediction to 4 decimal places
         output = self.final_layer(self.third_layer(self.second_layer(nn.relu(self.first_layer(images)))))
+        return round(output, decimals = 4)
         
