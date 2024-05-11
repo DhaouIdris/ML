@@ -32,4 +32,4 @@ class Solution(nn.Module):
         torch.manual_seed(0)
         pass
         # Return the model's prediction to 4 decimal places
-        return self.final_layer(self.second_layer(first_layer(images)))
+        return self.final_layer(self.second_layer(nn.functional.relu(self.first_layer(images))))
