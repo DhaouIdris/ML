@@ -26,6 +26,7 @@ class Solution(nn.Module):
         # Define the architecture here
         first_layer = nn.Linear(28*28, 512)
         second_layer = nn.Dropout(0,2)
+        third_layer = nn.Linear(512, 10)
     
     def forward(self, images: TensorType[float]) -> TensorType[float]:
         torch.manual_seed(0)
