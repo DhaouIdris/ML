@@ -9,4 +9,7 @@ class Solution:
         for sentance in positive:
             for word in sentance.split():
                 vocabulary.add(word)
+        for sentance in negative:
+            for word in sentance.split():
+                vocabulary.add(word)
         pass
