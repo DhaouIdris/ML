@@ -12,4 +12,12 @@ class Solution:
         for sentance in negative:
             for word in sentance.split():
                 vocabulary.add(word)
+
+        sorted_list = sorted(list(vocabulary)
+        str_to_int = {}
+        for i in range(len(sorted_list)):
+            str_to_int[sorted_list[i]] = i + 1
+
+        tensors = []
+        
         pass
