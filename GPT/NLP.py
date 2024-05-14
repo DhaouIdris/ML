@@ -6,10 +6,10 @@ from torchtyping import TensorType
 class Solution:
     def get_dataset(self, positive: List[str], negative: List[str]) -> TensorType[float]:
         vocabulary = set()
-        for sentance in positive:
+        for sentence in positive:
             for word in sentance.split():
                 vocabulary.add(word)
-        for sentance in negative:
+        for sentence in negative:
             for word in sentance.split():
                 vocabulary.add(word)
 
@@ -18,6 +18,12 @@ class Solution:
         for i in range(len(sorted_list)):
             str_to_int[sorted_list[i]] = i + 1
 
-        tensors = []
+        tensors_list = []
+
+        for sentence in positive:
+            list = []
+            for word in sentence.split():
+                list.append(str_to_int[word])
+            tensors_list.append(torch.tensor(list))
         
         pass
