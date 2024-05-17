@@ -45,8 +45,11 @@ class Solution:
 
 class Solution:
     def batch_loader(self, raw_dataset, context_length, batch_size):
+        torch.manual_seed(0)
         list_words = raw_dataset.split()
-        index = torch.randint(low=0, high= len(list_words), size = batch_size)
+        index = torch.randint(low=0, high= len(list_words) - context_length, size = (batch_size,))
+        X= []
+        Y= []
         
                         
 
