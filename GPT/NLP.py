@@ -51,5 +51,10 @@ class Solution:
         X= []
         Y= []
         
-                        
+        for i in index:
+            X.append(list_words[i:i+ context_lenght])
+            Y.append(list_words[i+1:i+1 + context_lenght])
+
+        return X, Y
+            
 
