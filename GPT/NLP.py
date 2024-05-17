@@ -25,5 +25,13 @@ class Solution:
             for word in sentence.split():
                 list.append(str_to_int[word])
             tensors_list.append(torch.tensor(list))
-        
-        pass
+
+
+        for sentence in negative:
+            list = []
+            for word in sentence.split():
+                list.append(str_to_int[word])
+            tensors_list.append(torch.tensor(list))
+
+        return nn.utils.rnn.pad_sequence(tensors, batch_first = True)
+
