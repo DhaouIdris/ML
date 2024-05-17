@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torchtyping import TensorType
+from typing import List, Tuple
 
 # torch.tensor(python_list) returns a Python list as a tensor
 class Solution:
@@ -33,5 +34,16 @@ class Solution:
                 list.append(str_to_int[word])
             tensors_list.append(torch.tensor(list))
 
-        return nn.utils.rnn.pad_sequence(tensors, batch_first = True)
+        return nn.utils.rnn.pad_sequence(tensors, batch_first = True
+
+
+
+
+    #Dataset_loader
+
+
+
+class Solution:
+    def batch_loader(self, raw_dataset, context_length, batch_size):
+                        
 
