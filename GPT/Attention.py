@@ -18,6 +18,10 @@ class SingleHeadAttention(nn.Module):
     def __init__(self, embedding_dim: int, attention_dim: int):
         super().__init__()
         torch.manual_seed(0)
+
+        self.keys = self.get_key(attention_dim, embedding_dim)
+        self.queries= self.get_query(attention_dim, embedding_dim)
+        self.values = self.get_value(attentioattention_dim, embedding_dim)
         pass
     
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
