@@ -26,4 +26,7 @@ class SingleHeadAttention(nn.Module):
     
     def forward(self, embedded: TensorType[float]) -> TensorType[float]:
         # Return your answer to 4 decimal places
+        key = self.get_key(embedded)
+        query = self.get_query(embedded)
+        value = self.get_value(embedded)
         pass
