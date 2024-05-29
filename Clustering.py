@@ -3,6 +3,8 @@ from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 
+#iris = datasets.load_iris()
+#X = iris.data
 
 n_samples = 1500
 random_state = 170
@@ -25,3 +27,11 @@ plt.title('Résultats du clustering K-Means')
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.show()
+
+
+
+
+
+
+
+
