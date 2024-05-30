@@ -2,10 +2,12 @@ import numpy as np
 from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 #iris = datasets.load_iris()
 #X = iris.data
+PCA_active = True 
 
 n_samples = 1500
 random_state = 170
@@ -14,6 +16,10 @@ X, y = make_blobs(n_samples, random_state)
 n_clusters = 3
 
 kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
+
+if PCA_active:
+    pca = PCA(n_components=2)
+    X_reduced = pca.fit_transform(X)
 
 #Training
 kmeans.fit(X)
