@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 
 #iris = datasets.load_iris()
@@ -11,10 +12,19 @@ random_state = 170
 X, y = make_blobs(n_samples, random_state)
 
 n_clusters = 3
+
 kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
 
 #Training
 kmeans.fit(X)
+
+"""
+# DBSCAN Model
+dbscan = DBSCAN(eps=0.3, min_samples=10)
+
+# Training
+y_pred = dbscan.fit_predict(X)
+"""
 
 #Prediction
 y_pred = kmeans.predict(X)
@@ -62,7 +72,7 @@ for n_clusters in n_clusters_list:
     plt.ylabel('Feature 2')
     plt.show()
 
-
+"""
 
 
 
