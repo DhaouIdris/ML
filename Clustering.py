@@ -82,4 +82,24 @@ for n_clusters in n_clusters_list:
 
 
 
+# Data
+n_samples = 1500
+random_state = 170
+X, y = make_blobs(n_samples=n_samples, random_state=random_state)
+
+#Distance with the mean of each clusters 
+wcss = []
+for n_clusters in range(1, 11):
+    kmeans = KMeans(n_clusters=n_clusters, random_state=random_state)
+    kmeans.fit(X)
+    wcss.append(kmeans.inertia_)
+
+# Elbow method
+plt.plot(range(1, 11), wcss, marker='o')
+plt.title('Elbow method to determine the number of clusters ')
+plt.xlabel('Numbers of clusters')
+plt.ylabel('WCSS (Within-Cluster Sum of Squares)')
+plt.show()
+
+
 
