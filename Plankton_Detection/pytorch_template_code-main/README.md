@@ -14,7 +14,7 @@ The **Plankton dataset** consists of:
 - Metadata for each image, including species labels.
 - A diverse set of plankton species, including copepods, diatoms, and other micro-organisms.
 
-We have 21 fully labeled samples for training, and you must predict the annotations for 3 unlabeled scans. The annotations have been provided by :
+We have 21 fully labeled samples for training, and 3 scans are going to be used for validation. The annotations have been provided by :
 Sorbonne Université/CNRS - Institut de la Mer de Villefranche (IMEV), Sorbonne Université/CNRS - Laboratoire d'Océanographie de Villefranche (LOV); 2020; Plankton community in Régent (680µm) net, Point B, Villefranche-sur-Mer, France https://dx.doi.org/10.14284/477
 
 ## Project Goals
