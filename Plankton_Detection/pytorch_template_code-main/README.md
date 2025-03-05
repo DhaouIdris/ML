@@ -1,65 +1,36 @@
-# Template base code for pytorch
+# Plankton Classification
 
-This repository contains a template base code for a complete pytorch pipeline.
+## Project Overview
+This project focuses on applying **computer vision techniques** to classify plankton species using the **Plankton dataset**. The dataset contains high-resolution images of plankton samples, which are essential for studying marine biodiversity and ecosystem health. The goal is to build a robust machine learning model that can automatically classify plankton species from the images.
 
-This is a template because it works on fake data but aims to illustrate some pythonic syntax allowing the pipeline to be modular.
+![Example Plankton Image](plankton_sample.png)  
+*Figure 1: Example of a plankton image from the dataset.*
 
-More specifically, this template base code aims to target :
+---
 
-- modularity : allowing to change models/optimizers/ .. and their hyperparameters easily
-- reproducibility : saving the commit id, ensuring every run saves its assets in a different directory, recording a summary card for every experiment, building a virtual environnement
+## Dataset
+The **Plankton dataset** consists of:
+- High-resolution grayscale images of plankton samples and masks.
+- Metadata for each image, including species labels.
+- A diverse set of plankton species, including copepods, diatoms, and other micro-organisms.
 
-For the last point, if you ever got a good model as an orphane pytorch tensor whithout being able to remember in which conditions, with which parameters and so on you got, you see what I mean. 
+We have 21 fully labeled samples for training, and you must predict the annotations for 3 unlabeled scans. The annotations have been provided by :
+Sorbonne Université/CNRS - Institut de la Mer de Villefranche (IMEV), Sorbonne Université/CNRS - Laboratoire d'Océanographie de Villefranche (LOV); 2020; Plankton community in Régent (680µm) net, Point B, Villefranche-sur-Mer, France https://dx.doi.org/10.14284/477
 
-## Usage
+## Project Goals
+1. **Preprocessing**:
+   - Extract patches from the images that have large resolutions.
+   - Augment the dataset to improve model generalization (e.g., rotation, flipping, cropping).
 
-### Local experimentation
+2. **Feature Extraction**:
+   - Extract meaningful features from plankton images using mainly:
+     - Deep learning-based methods (e.g., CNNs).
 
-For a local experimentation, you start by setting up the environment :
+3. **Classification**:
+   - Train a machine learning model to classify plankton species.
+   - Experiment with models such as:
+     - Convolutional Neural Networks (CNNs).
+     - Pre-trained models (e.g., ResNet, UNet) with transfer learning.
 
-```
-python3 -m virtualenv venv
-source venv/bin/activate
-python -m pip install .
-```
-
-Then you can run a training, by editing the yaml file, then 
-
-```
-python -m torchtmpl.main config.yml train
-```
-
-And for testing (**not yet implemented**)
-
-```
-python main.py path/to/your/run test
-```
-
-### Cluster experimentation (**not yet implemented**)
-
-For running the code on a cluster, we provide an example script for starting an experimentation on a SLURM based cluster.
-
-The script we provide is dedicated to a use on our clusters and you may need to adapt it to your setting. 
-
-Then running the simulation can be as simple as :
-
-```
-python3 submit.py
-```
-
-## Testing the functions
-
-Every module/script is equiped with some test functions. Although these are not unitary tests per se, they nonetheless illustrate how to test the provided functions.
-
-For example, you can call :
-
-
-```
-python3 -m virtualenv venv
-source venv/bin/activate
-python -m pip install .
-python -m torchtmpl.models
-```
-
-and this will call the test functions in the `torchtmpl/models/__main__.py` script.
-
+4. **Evaluation**:
+   - Evaluate model performance using metrics like accuracy, precision, recall, and F1-score.
