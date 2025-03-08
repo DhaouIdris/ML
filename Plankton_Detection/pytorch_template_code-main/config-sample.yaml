@@ -1,25 +1,29 @@
 data:
-  trainpath: '/opt/Datasets/'
-  # testpath: '/dummy/path/to/test'
-  batch_size: 256
-  num_workers: 4
+  trainpath: /mounts/Datasets3/2024-2025-ChallengePlankton/train
+  testpath: /mounts/Datasets3/2024-2025-ChallengePlankton/test
+  batch_size: 4
+  num_workers: 8
   valid_ratio: 0.2
+  patch_size: 128
 
 optim:
-  algo: SGD
+  algo: Adam
   params:
-    lr: 0.01
+    lr: 0.001
 
-nepochs: 20
-loss: "CrossEntropyLoss"
+nepochs: 100
+loss: 
+  name: "CrossEntropyLoss"
+  params:
 
 logging:
   # wandb: 
   #   project: sample_project
   #   entity: sample_entity
-  logdir: "./logs"  # Better to provide the fullpath, especially on the cluster
-# model:
-#   class: Linear
+  logdir: "/usr/users/sdim/sdim_15/project_plankton  # Better to provide the fullpath, especially on the cluster
+
 model:
-  class: VanillaCNN
-  num_layers : 4
+  class: Vanilla
+  num_layers: 4
+
+
