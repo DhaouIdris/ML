@@ -6,7 +6,7 @@
 ## Dataset
 The **CIFAR100 dataset** consists of:
 This dataset has 100 classes containing 600 images each. There are 500 training images and 100 testing images per class. The 100 classes in the CIFAR-100 are grouped into 20 superclasses. Each image comes with a "fine" label (the class to which it belongs) and a "coarse" label (the superclass to which it belongs).
-
+![nothing](cifar.jpg "Dataset")
 https://www.cs.toronto.edu/~kriz/cifar.html
 
 ## Project Goals
