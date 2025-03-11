@@ -28,15 +28,15 @@ def get_dataloaders(data_config, use_cuda):
 
     logging.info("  - Dataset creation")
 
-    input_transform = transforms.Compose(
-        [transforms.Grayscale(), transforms.Resize((128, 128)), transforms.ToTensor()]
+
+    base_dataset = PlanktonDataset.PlanktonDataset(
+        dir=data_config["trainpath"],
+        patch_size=data_config["patch_size"],
+        stride=data_config["stride"],
+        train=True,
+        transform=None,
     )
 
-    base_dataset = torchvision.datasets.Caltech101(
-        root=data_config["trainpath"],
-        download=True,
-        transform=input_transform,
-    )
 
     logging.info(f"  - I loaded {len(base_dataset)} samples")
 
