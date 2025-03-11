@@ -127,3 +127,29 @@ def get_size(ppm_path):
         assert data_size == (ncols * nrows * nbytes_per_pixel)
     
     return nrows, ncols
+
+
+class PlanktonDataset(Dataset):
+    def __init__(self, dir, patch_size, stride, train=True, transform = None):
+        self.dir = dir
+        self.patch_size = patch_size
+        self.stride = stride
+        self.train = train
+        self.transform = transform
+        self.scan_files = []
+        self.mask_files = []
+        self.patches = []
+        self.image_sizes = {} 
+        
+        for file_name in os.listdir(dir):
+            if file_name.endswith("scan.png.ppm"):
+                base_name = file_name.replace("scan.png.ppm", "")
+                mask_name = base_name + "mask.png.ppm"
+
+                scan_path = os.path.join(dir, file_name)
+                mask_path = os.path.join(dir, mask_name)
+
+                if os.path.exists(scan_path):
+                    self.scan_files.append(scan_path)
+                if os.path.exists(mask_path):
+                    self.mask_files.append(mask_path)
