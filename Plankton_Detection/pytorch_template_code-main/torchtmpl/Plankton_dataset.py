@@ -169,3 +169,25 @@ class PlanktonDataset(Dataset):
             mask_patch = np.where(mask_patch < 8, 0, 1).astype(np.float32)
             if mask_patch.dtype.byteorder not in ('=', '|'):
                 mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
+
+        img_height, img_width = img_patch.shape[:2]
+        if img_height < self.patch_size or img_width < self.patch_size:
+            pad_height = self.patch_size - img_height
+            pad_width = self.patch_size - img_width
+            img_patch = np.pad(img_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
+
+            if self.train:
+                mask_patch = np.pad(mask_patch, ((0, pad_height), (0, pad_width)), mode='constant', constant_values=0)
+        
+        if self.transform:
+            if self.train:
+                transformed = self.transform(image=img_patch, mask=mask_patch)
+                img_patch, mask_patch = transformed["image"], transformed["mask"]
+            else:
+                transformed = self.transform(image=img_patch)
+                img_patch = transformed["image"]
+
+        if not self.train:
+            return img_patch, row_start, col_start, img_idx
+        
+        return img_patch, mask_patch
