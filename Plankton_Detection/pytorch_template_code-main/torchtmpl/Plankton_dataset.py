@@ -154,6 +154,19 @@ class PlanktonDataset(Dataset):
                 if os.path.exists(mask_path):
                     self.mask_files.append(mask_path)
 
+        for img_idx, scan_path in enumerate(self.scan_files):
+            height, width = get_size(scan_path)
+            self.image_sizes[img_idx] = (width, height)
+            num_patches_x = (width + self.patch_size - 1) // self.stride
+            num_patches_y = (height + self.patch_size - 1) // self.stride
+            
+            for i in range(num_patches_y):
+                for j in range(num_patches_x):
+                    row_start = i * stride
+                    col_start = j * stride
+                    self.patches.append((img_idx, row_start, col_start))
+
+    
     def __len__(self):
         return len(self.patches)
     
