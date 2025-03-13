@@ -153,3 +153,19 @@ class PlanktonDataset(Dataset):
                     self.scan_files.append(scan_path)
                 if os.path.exists(mask_path):
                     self.mask_files.append(mask_path)
+
+    def __len__(self):
+        return len(self.patches)
+    
+    def __getitem__(self, idx):
+        img_idx, patch_i, patch_j = self.patches[idx]
+        
+        row_start = max(0, min(patch_i, self.image_sizes[img_idx][1] - self.patch_size))
+        col_start = max(0, min(patch_j, self.image_sizes[img_idx][0] - self.patch_size))
+        img_patch = extract_patch_from_ppm(self.scan_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+        
+        if self.train:
+            mask_patch = extract_patch_from_ppm(self.mask_files[img_idx], row_start, col_start, (self.patch_size, self.patch_size))
+            mask_patch = np.where(mask_patch < 8, 0, 1).astype(np.float32)
+            if mask_patch.dtype.byteorder not in ('=', '|'):
+                mask_patch = mask_patch.astype(mask_patch.dtype.newbyteorder('='))
