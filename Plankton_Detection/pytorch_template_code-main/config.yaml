@@ -13,8 +13,11 @@ optim:
 
 nepochs: 100
 loss: 
-  name: "CrossEntropyLoss"
+  name: "FocalLoss"
   params:
+     alpha: 0.5
+     gamma: 2.5
+
 
 logging:
   # wandb: 
@@ -23,7 +26,7 @@ logging:
   logdir: "/usr/users/sdim/sdim_15/project_plankton  # Better to provide the fullpath, especially on the cluster
 
 model:
-  class: Vanilla
-  num_layers: 4
+  class: UNet
+  threshold: .55
 
 
