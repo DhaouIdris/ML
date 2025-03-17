@@ -10,18 +10,26 @@ import pathlib
 import yaml
 import wandb
 import torch
+import torch.nn as nn
 import torchinfo.torchinfo as torchinfo
+import numpy as np
+from tqdm import tqdm
+
 
 # Local imports
-from . import data
-from . import models
-from . import optim
-from . import utils
-
+import data
+import models
+import optim
+import utils
+import submission
 
 def train(config):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda") if use_cuda else torch.device("cpu")
+    if use_cuda:
+        print("using gpu")
+    else:
+        print("using cpu")
 
     if "wandb" in config["logging"]:
         wandb_config = config["logging"]["wandb"]
@@ -39,16 +47,17 @@ def train(config):
     train_loader, valid_loader, input_size, num_classes = data.get_dataloaders(
         data_config, use_cuda
     )
-
+    
     # Build the model
     logging.info("= Model")
     model_config = config["model"]
-    model = models.build_model(model_config, input_size, num_classes)
+    model = models.build_model(model_config, input_size[0], 1)
+    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/model_logs/UnetPlus_5/best_model.pt")) 
     model.to(device)
 
     # Build the loss
     logging.info("= Loss")
-    loss = optim.get_loss(config["loss"])
+    loss = optim.get_loss(config["loss"]["name"], config)
 
     # Build the optimizer
     logging.info("= Optimizer")
@@ -94,32 +103,37 @@ def train(config):
 
     # Define the early stopping callback
     model_checkpoint = utils.ModelCheckpoint(
-        model, str(logdir / "best_model.pt"), min_is_best=True
+        model, str(logdir / "best_model.pt"), min_is_best=False
     )
 
+    valid_iter = None
     for e in range(config["nepochs"]):
         # Train 1 epoch
-        train_loss = utils.train(model, train_loader, loss, optimizer, device)
+        train_loss, train_metrics = utils.train(model, train_loader, loss, optimizer, device, config)
 
         # Test
-        test_loss = utils.test(model, valid_loader, loss, device)
+        test_loss, test_metrics = utils.test(model, valid_loader, loss, device, config)
 
-        updated = model_checkpoint.update(test_loss)
+        updated = model_checkpoint.update(test_metrics["f1"])
         logging.info(
-            "[%d/%d] Test loss : %.3f %s"
+            "[%d/%d] Test F1-score : %.3f %s"
             % (
                 e,
                 config["nepochs"],
-                test_loss,
+                test_metrics["f1"],
                 "[>> BETTER <<]" if updated else "",
             )
         )
 
         # Update the dashboard
-        metrics = {"train_CE": train_loss, "test_CE": test_loss}
+        metrics = {"train_CE": train_loss, "test_CE": test_loss,
+                   **{"train_"+k:v for k,v in train_metrics.items()},
+                   **{"test_"+k:v for k,v in test_metrics.items()}}
         if wandb_log is not None:
             logging.info("Logging on wandb")
             wandb_log(metrics)
+            valid_iter = utils.visualize_predictions(model, valid_loader, device, config, valid_iter=valid_iter, n_samples=4)
+
 
 
 def test(config):
