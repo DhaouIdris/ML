@@ -137,7 +137,75 @@ def train(config):
 
 
 def test(config):
-    raise NotImplementedError
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda") if use_cuda else torch.device("cpu")
+    if use_cuda:
+        print("using gpu")
+    else:
+        print("using cpu")
+
+    # Build the dataloaders
+    logging.info("= Building the dataloaders")
+    data_config = config["data"]
+
+    test_loader, input_size, num_classes = data.get_test_dataloaders(
+        data_config, use_cuda
+    )
+
+    # Build the model
+    logging.info("= Model")
+    model_config = config["model"]
+    model = models.build_model(model_config, 1, 1)
+    model.load_state_dict(torch.load("model_logs/UnetPlus_0/best_model.pt"))
+    model.to(device)
+
+    # Inference
+    logging.info("= Running inference on the test set")
+    reconstructed_images = {}  # Stores final full-sized predictions
+    normalization_map = {}  # Stores patch counts for averaging
+
+    patch_size = test_loader.dataset.patch_size
+    gaussian = utils.gaussian_kernel(patch_size, sigma=128.)
+
+    with torch.no_grad():
+        for batch in tqdm(test_loader):
+            images, row_starts, col_starts, img_indices = batch
+            images = images.to(device).to(dtype=torch.float32)
+
+            # Forward pass (keep raw logits)
+            outputs = model(images).cpu().numpy()
+
+            for i in range(outputs.shape[0]):
+                img_idx = img_indices[i].item()
+                row_start = row_starts[i].item()
+                col_start = col_starts[i].item()
+                logit_patch = outputs[i][0]  # Extract 2D logits
+                width, height = test_loader.dataset.image_sizes[img_idx]
+
+                if img_idx not in reconstructed_images:
+                    reconstructed_images[img_idx] = np.zeros((height, width), dtype=np.float32)
+                    normalization_map[img_idx] = np.zeros((height, width), dtype=np.float32)
+
+                # Define patch end coordinates
+                row_end = min(row_start + patch_size, reconstructed_images[img_idx].shape[0])
+                col_end = min(col_start + patch_size, reconstructed_images[img_idx].shape[1])
+
+                valid_patch_height = row_end - row_start
+                valid_patch_width = col_end - col_start
+
+                # Accumulate logits and count overlapping contributions
+                weight_patch = gaussian[:valid_patch_height, :valid_patch_width]
+                reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width] * weight_patch
+                normalization_map[img_idx][row_start:row_end, col_start:col_end] += weight_patch
+
+                # reconstructed_images[img_idx][row_start:row_end, col_start:col_end] += logit_patch[:valid_patch_height, :valid_patch_width]
+                # normalization_map[img_idx][row_start:row_end, col_start:col_end] += 1
+
+    #logging.info("= Generating submission file")
+    for img_idx in reconstructed_images:
+        reconstructed_images[img_idx] /= normalization_map[img_idx]  # Average overlapping regions
+        reconstructed_images[img_idx] = (torch.sigmoid(torch.tensor(reconstructed_images[img_idx])) >= model_config['threshold']).byte().numpy()
+
 
 
 if __name__ == "__main__":
