@@ -2,6 +2,8 @@ import numpy as np
 import os
 import torch
 import matplotlib.pyplot as plt
+from torch.utils.data import Dataset
+
 
 def show_plankton_image(img, mask):
     """
