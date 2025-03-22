@@ -160,3 +160,58 @@ def test(model, loader, f_loss, device, config):
     total_metrics = {k: v / num_samples for k, v in total_metrics.items()}
     return total_loss / num_samples, total_metrics
 
+
+def visualize_predictions(model, valid_loader, device, config, valid_iter=None, n_samples=4):
+    model.eval()  # Switch to evaluation mode
+    
+    if valid_iter is None:
+        valid_iter = iter(valid_loader)
+    
+    try:
+        images, targets = next(valid_iter)  # Get next batch
+    except StopIteration:  
+        valid_iter = iter(valid_loader)  # Reset if exhausted
+        images, targets = next(valid_iter) 
+        
+    images, targets = images.to(device), targets.to(device)
+
+    # Get model predictions
+    with torch.no_grad():
+        predictions = model(images)
+        predictions = torch.sigmoid(predictions) >= config["model"]["threshold"]
+    
+    # Select a few samples to visualize
+    samples = min(n_samples, images.size(0))
+    fig, axes = plt.subplots(samples, 3, figsize=(12, 4*samples))
+    
+    if samples == 1:  # Handle batch_size=1 case
+        axes = np.expand_dims(axes, axis=0)
+
+    for i in range(samples):
+        # Original image
+        img = images[i]
+        if images.shape[0] == 1:  # Grayscale image
+            img = img.squeeze(0)  # Remove channel dimension
+            axes[i, 0].imshow(img.cpu().numpy(), cmap='gray')
+        else:
+            axes[i, 0].imshow(img.cpu().permute(1, 2, 0).numpy())
+        axes[i, 0].set_title("Input Image")
+        axes[i, 0].axis('off')
+        
+        # Ground truth (if segmentation or similar task)
+        axes[i, 1].imshow(targets[i].cpu().numpy().squeeze(), cmap='gray')
+        axes[i, 1].set_title("Ground Truth")
+        axes[i, 1].axis('off')
+        
+        # Prediction (same format as ground truth)
+        axes[i, 2].imshow(predictions[i].cpu().numpy().squeeze(), cmap='gray')
+        axes[i, 2].set_title("Prediction")
+        axes[i, 2].axis('off')
+
+    # Log to wandb
+    wandb.log({
+        "predictions": [wandb.Image(fig)]
+    })
+    plt.close(fig)
+    
+    return valid_iter
