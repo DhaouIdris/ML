@@ -58,6 +58,19 @@ class DiceLoss(nn.Module):
 
         return 1 - dice
 
+class DiceFocalLoss(nn.Module):
+    def __init__(self, alpha, gamma, dice_weight, focal_weight):
+        super(DiceFocalLoss, self).__init__()
+        self.dice_weight = dice_weight
+        self.focal_weight = focal_weight
+        self.dice_loss = DiceLoss()
+        self.focal_loss = FocalLoss(alpha, gamma)
+
+    def forward(self, inputs, targets):
+        dice = self.dice_loss(inputs, targets)
+        focal = self.focal_loss(inputs, targets)
+        return self.dice_weight * dice + self.focal_weight * focal
+
 
 def get_loss(lossname):
     if lossname == "FocalLoss":
