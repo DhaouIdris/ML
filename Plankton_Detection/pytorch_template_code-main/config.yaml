@@ -7,26 +7,37 @@ data:
   patch_size: 128
 
 optim:
-  algo: Adam
+  algo: AdamW
   params:
-    lr: 0.001
+    lr: 0.0001
+    weight_decay: 0.01
+    # betas: [0.8, 0.9]
+    # momentum: 0.9
+
 
 nepochs: 100
 loss: 
-  name: "FocalLoss"
+  name: DiceFocalLoss
   params:
-     alpha: 0.5
+     alpha: [.2, .8]
      gamma: 2.5
+     dice_weight: .2
+     focal_weight: .8
 
 
 logging:
-  # wandb: 
-  #   project: sample_project
-  #   entity: sample_entity
-  logdir: "/usr/users/sdim/sdim_15/project_plankton  # Better to provide the fullpath, especially on the cluster
+  wandb: 
+    project: planktonDL
+    entity: idris-dhaou
+  logdir: "/usr/users/sdim/sdim_15/model_logs"  # Better to provide the fullpath, especially on the cluster
 
 model:
-  class: UNet
+  class: UnetPlus
   threshold: .55
+
+prediction:
+  #dir: "/usr/users/sdim/sdim_15/prediction
+
+
 
 
