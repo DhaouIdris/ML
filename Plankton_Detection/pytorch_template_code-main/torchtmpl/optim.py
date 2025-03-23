@@ -72,12 +72,22 @@ class DiceFocalLoss(nn.Module):
         return self.dice_weight * dice + self.focal_weight * focal
 
 
-def get_loss(lossname):
-    if lossname == "FocalLoss":
+def get_loss(lossname, config):
+    if lossname == "WeightedBCEWithLogitsLoss":
+        pos_weight = torch.tensor(config["loss"]["params"]["pos_weight"], device="cuda" if torch.cuda.is_available() else "cpu")
+        return nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+    elif lossname == "FocalLoss":
         alpha = config["loss"]["params"]["alpha"]
         gamma = config["loss"]["params"]["gamma"]
         return lossf.FocalLoss(alpha=alpha, gamma=gamma)
-    return eval(f"nn.{lossname}()")
+    elif lossname == "DiceFocalLoss":
+        alpha = config["loss"]["params"]["alpha"]
+        gamma = config["loss"]["params"]["gamma"]
+        dice_weight = config["loss"]["params"]["dice_weight"]
+        focal_weight = config["loss"]["params"]["focal_weight"]
+        return lossf.DiceFocalLoss(alpha=alpha, gamma=gamma, dice_weight=dice_weight, focal_weight=focal_weight)
+    return eval(f"nn.{config['loss']}()")
+
 
 
 
