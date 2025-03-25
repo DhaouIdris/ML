@@ -7,6 +7,9 @@ import os
 import torch
 import torch.nn
 import tqdm
+import wandb
+import numpy as np
+import matplotlib.pyplot as plt
 
 import metrics
 
@@ -202,19 +205,19 @@ def visualize_predictions(model, valid_loader, device, config, valid_iter=None, 
         img = images[i]
         if images.shape[0] == 1:  # Grayscale image
             img = img.squeeze(0)  # Remove channel dimension
-            axes[i, 0].imshow(img.cpu().numpy(), cmap='gray')
+            axes[i, 0].imshow(img.cpu().np(), cmap='gray')
         else:
-            axes[i, 0].imshow(img.cpu().permute(1, 2, 0).numpy())
+            axes[i, 0].imshow(img.cpu().permute(1, 2, 0).np())
         axes[i, 0].set_title("Input Image")
         axes[i, 0].axis('off')
         
         # Ground truth (if segmentation or similar task)
-        axes[i, 1].imshow(targets[i].cpu().numpy().squeeze(), cmap='gray')
+        axes[i, 1].imshow(targets[i].cpu().np().squeeze(), cmap='gray')
         axes[i, 1].set_title("Ground Truth")
         axes[i, 1].axis('off')
         
         # Prediction (same format as ground truth)
-        axes[i, 2].imshow(predictions[i].cpu().numpy().squeeze(), cmap='gray')
+        axes[i, 2].imshow(predictions[i].cpu().np().squeeze(), cmap='gray')
         axes[i, 2].set_title("Prediction")
         axes[i, 2].axis('off')
 
