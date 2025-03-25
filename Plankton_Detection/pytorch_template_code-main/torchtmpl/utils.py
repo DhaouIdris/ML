@@ -8,6 +8,7 @@ import torch
 import torch.nn
 import tqdm
 
+import metrics
 
 def generate_unique_logpath(logdir, raw_run_name):
     """
@@ -159,6 +160,15 @@ def test(model, loader, f_loss, device, config):
         num_samples += inputs.shape[0]
     total_metrics = {k: v / num_samples for k, v in total_metrics.items()}
     return total_loss / num_samples, total_metrics
+
+def get_logdir(logdir):
+    i = 0
+    while True:
+        log_path = logdir + "_" + str(i)
+        # log_path = logdir + "-" + str(i)
+        if not os.path.isdir(log_path):
+            return log_path
+        i = i + 1
 
 
 def visualize_predictions(model, valid_loader, device, config, valid_iter=None, n_samples=4):
