@@ -36,7 +36,7 @@ model:
   threshold: .55
 
 prediction:
-  #dir: "/usr/users/sdim/sdim_15/prediction
+  dir: "/usr/users/sdim/sdim_15/prediction
 
 
 
