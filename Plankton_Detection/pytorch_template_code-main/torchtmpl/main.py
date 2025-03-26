@@ -63,6 +63,15 @@ def train(config):
     optim_config = config["optim"]
     optimizer = optim.get_optimizer(optim_config, model.parameters())
 
+    logging.info("= Scheduler")
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, 
+        mode='max',
+        factor=0.1,
+        patience=3,
+        verbose=True
+    )
+    
     # Build the callbacks
     logging_config = config["logging"]
     # Let us use as base logname the class name of the modek
