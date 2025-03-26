@@ -21,7 +21,6 @@ import data
 import models
 import optim
 import utils
-import submission
 
 def train(config):
     use_cuda = torch.cuda.is_available()
@@ -52,7 +51,7 @@ def train(config):
     logging.info("= Model")
     model_config = config["model"]
     model = models.build_model(model_config, input_size[0], 1)
-    model.load_state_dict(torch.load("/usr/users/sdim/sdim_22/team-6-kaggle-challenge-deep-learning/model_logs/UnetPlus_5/best_model.pt")) 
+    model.load_state_dict(torch.load("/usr/users/sdim/sdim_15/planktonDL/model_logs/UnetPlus_5/best_model.pt")) 
     model.to(device)
 
     # Build the loss
