@@ -173,7 +173,7 @@ def test(config):
     normalization_map = {}  # Stores patch counts for averaging
 
     patch_size = test_loader.dataset.patch_size
-    gaussian = utils.gaussian_kernel(patch_size, sigma=128.)
+    gaussian = utils.gaussian_kernel(patch_size, sigma=192.)
 
     with torch.no_grad():
         for batch in tqdm(test_loader):
