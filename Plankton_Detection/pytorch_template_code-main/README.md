@@ -34,3 +34,8 @@ Sorbonne Université/CNRS - Institut de la Mer de Villefranche (IMEV), Sorbonne 
 
 4. **Evaluation**:
    - Evaluate model performance using metrics like accuracy, precision, recall, and F1-score.
+  
+## Results
+![Plankton predictions](plankton_predictions.png)  
+*Figure 1: Results with F1 = 0.90061.*
+
