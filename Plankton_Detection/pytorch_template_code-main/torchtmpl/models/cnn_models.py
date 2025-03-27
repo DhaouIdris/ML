@@ -8,6 +8,24 @@ import operator
 import torch
 import torch.nn as nn
 
+class AttentionGate(nn.Module):
+    """Attention Gate for UNet."""
+    def __init__(self, in_channels, gating_channels):
+        super(AttentionGate, self).__init__()
+        self.W_g = nn.Sequential(
+            nn.Conv2d(gating_channels, in_channels, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(in_channels)
+        )
+        self.W_x = nn.Sequential(
+            nn.Conv2d(in_channels, in_channels, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(in_channels)
+        )
+        self.psi = nn.Sequential(
+            nn.Conv2d(in_channels, 1, kernel_size=1, stride=1, padding=0),
+            nn.BatchNorm2d(1),
+            nn.Sigmoid()
+        )
+        self.relu = nn.ReLU(inplace=True)
 
 def conv_relu_bn(cin, cout):
     return [
@@ -44,3 +62,5 @@ def VanillaCNN(cfg, input_size, num_classes):
     num_features = reduce(operator.mul, out_cnn.shape[1:], 1)
     out_layers = [nn.Flatten(start_dim=1), nn.Linear(num_features, num_classes)]
     return nn.Sequential(conv_model, *out_layers)
+
+
