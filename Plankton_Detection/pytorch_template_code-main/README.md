@@ -39,3 +39,7 @@ Sorbonne Université/CNRS - Institut de la Mer de Villefranche (IMEV), Sorbonne 
 ![Plankton predictions](plankton_predictions.png)  
 *Figure 1: Results with F1 = 0.90061.*
 
+- blue: true negatives
+- green : true positives
+- red : false positives
+- purple: false negatives
