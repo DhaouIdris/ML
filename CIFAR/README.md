@@ -27,5 +27,5 @@ https://www.cs.toronto.edu/~kriz/cifar.html
    - Evaluate model performance using metrics like accuracy, precision, recall, and F1-score.
   
 5. **Results**
-   ![nothing](cnn.jpg "Block influence")
+   ![nothing](cnn.png "Block influence")
 
