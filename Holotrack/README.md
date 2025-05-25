@@ -13,3 +13,13 @@ The goal is to develop a machine learning pipeline that:
 - Uses **synthetic data** to train a model robust to optical variability and noise.
 
 ---
+
+
+
+## 📚 References
+
+- Chen et al., *Holographic 3D Particle Imaging with Model-Based Deep Network* (2021).
+- Kumar & Hong (2024), *Generalizable Deep Learning for 3D Particle Imaging in Holography*.
+
+The code was adapted from Chen GitHub's project: https://github.com/Ni-Chen/3D-MB-HoloNet
+---
