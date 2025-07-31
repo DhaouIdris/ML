@@ -117,3 +117,69 @@ class LogsTracker(Callback):
             f"lr: {self.trainer.optimizer.param_groups[0]['lr']}",
             "[>> BETTER <<]" if updated else ""))
         
+
+class BinaryMetricsCallback(Callback):
+    def __init__(self, trainer, num_classes, threshold=0.5, add_cm=False, cm_by_step: int = 100):
+        super(BinaryMetricsCallback, self).__init__(trainer=trainer)
+        self.num_classes = num_classes
+        self.threshold = threshold
+        self.add_cm = add_cm
+        self.cm_by_step = cm_by_step
+
+    def on_epoch_start(self):
+        self.tn = 0
+        self.fp = 0
+        self.fn = 0
+        self.tp = 0
+
+    def __str__(self): return f"MetricCallbacks_th={self.threshold}"
+
+
+    def on_batch_end(self, train, y_pred, y_true, global_step):
+        mode = "train" if train else "eval"
+        y_pred = (torch.sigmoid(y_pred) > self.threshold).int()
+        preds = y_pred.cpu().numpy().flatten()
+        labels = y_true.cpu().numpy().flatten()
+        tn, fp, fn, tp = confusion_matrix(labels, preds, labels=np.arange(self.num_classes)).ravel()
+
+        self.tn += tn
+        self.fp += fp
+        self.fn += fn
+        self.tp += tp
+
+        precision, recall, f1_score = self.get_metrics()
+
+        for n,m in [("precision", precision), ("recall", recall), ("f1_score", f1_score)]:
+            self.trainer.writer.add_scalar(tag=f"{self}-{n.title()}/{mode}",
+                scalar_value=m, global_step=global_step)
+
+            if hasattr(self.trainer, "neptune_run"):
+                self.trainer.neptune_run[f"{mode}/{self}-{n.title()}"].append(m)
+        
+    def on_epoch_end(self, train: bool):
+        mode = "train" if train else "eval"
+        cm = np.array([[self.tn, self.fp],[self.fn,self.tp]])
+
+        if self.add_cm and self.trainer.epoch % self.cm_by_step == 0:
+            fig = self.plot_confusion_matrix(cm, self.trainer.epoch)
+
+            self.trainer.writer.add_figure(f"Cm-{self}/{mode}", fig, self.trainer.epoch)
+            
+            if hasattr(self.trainer, "neptune_run"):
+                self.trainer.neptune_run[f"{mode}/cm-{self}/{self.trainer.epoch}"].upload(fig)
+
+    def get_metrics(self):
+        precision = self.tp / (self.tp + self.fp) if (self.tp + self.fp) > 0 else 0.
+        recall = self.tp / (self.tp + self.fn) if (self.tp + self.fn) > 0 else 0.
+        f1_score = 2*precision*recall / (precision + recall) if (precision + recall) >0 else 0
+        return precision, recall, f1_score
+
+    def plot_confusion_matrix(self, cm, epoch):
+        fig, ax = plt.subplots(figsize=(6, 6))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=range(self.num_classes), yticklabels=range(self.num_classes))
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.title(f"Confusion Matrix - Epoch {epoch}")
+        plt.tight_layout()
+        return fig
+
