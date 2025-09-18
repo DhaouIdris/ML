@@ -20,3 +20,16 @@ def iFT2d(a_tensor):
     x_ifft = torch.fft.ifft2(x_shifted, norm="backward")
     x_out = ifftshift2d(x_ifft)
     return x_out
+
+# Custom layer MU: returns a trainable scalar parameter tiled to the spatial dimensions.
+class MU(nn.Module):
+    def __init__(self):
+        super(MU, self).__init__()
+        # Parameter shape (1,1,1) which will be broadcast to (channels, height, width)
+        self.w = nn.Parameter(torch.randn(1, 1, 1))
+        nn.init.xavier_normal_(self.w)
+
+    def forward(self):
+        # x assumed shape: (batch, channels, height, width)
+        # return self.w.clamp(min=0).expand(1, x.size(1), x.size(2), x.size(3))
+        return self.w.clamp(min=0)
