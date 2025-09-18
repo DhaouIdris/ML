@@ -44,4 +44,4 @@ class SoftThreshold(nn.Module):
 
     def forward(self, x):
         bias_tile = self.bias.clamp(min=0).expand(1, x.size(1), x.size(2), x.size(3))
-        return torch.sign(x) * F.relu(x - bias_tile)
+        return torch.sign(x) * F.relu(torch.abs(x) - bias_tile)
