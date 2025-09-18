@@ -33,3 +33,15 @@ class MU(nn.Module):
         # x assumed shape: (batch, channels, height, width)
         # return self.w.clamp(min=0).expand(1, x.size(1), x.size(2), x.size(3))
         return self.w.clamp(min=0)
+
+
+# Custom soft-thresholding layer.
+class SoftThreshold(nn.Module):
+    def __init__(self):
+        super(SoftThreshold, self).__init__()
+        self.bias = nn.Parameter(torch.randn(1, 1, 1))
+        nn.init.xavier_normal_(self.bias)
+
+    def forward(self, x):
+        bias_tile = self.bias.clamp(min=0).expand(1, x.size(1), x.size(2), x.size(3))
+        return torch.sign(x) * F.relu(x - bias_tile)
