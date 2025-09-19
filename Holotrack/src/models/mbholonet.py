@@ -45,3 +45,27 @@ class SoftThreshold(nn.Module):
     def forward(self, x):
         bias_tile = self.bias.clamp(min=0).expand(1, x.size(1), x.size(2), x.size(3))
         return torch.sign(x) * F.relu(torch.abs(x) - bias_tile)
+
+
+# Residual block similar to the Keras res_block.
+class ResBlock(nn.Module):
+    def __init__(self, filters):
+        super(ResBlock, self).__init__()
+        self.conv1 = nn.Conv2d(filters, filters, kernel_size=3, stride=1, padding=1, bias=False)
+        nn.init.xavier_normal_(self.conv1.weight)
+        self.bn1 = nn.BatchNorm2d(filters)
+        self.conv2 = nn.Conv2d(filters, filters, kernel_size=3, stride=1, padding=1, bias=False)
+        nn.init.xavier_normal_(self.conv2.weight)
+        self.bn2 = nn.BatchNorm2d(filters)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        shortcut = x
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+        out = out + shortcut
+        out = self.relu(out)
+        return out
