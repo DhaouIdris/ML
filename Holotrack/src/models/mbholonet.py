@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 # For FFT shift operations; PyTorch 1.8+ has these built in.
 def fftshift2d(x):
