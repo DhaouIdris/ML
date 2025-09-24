@@ -69,3 +69,19 @@ class ResBlock(nn.Module):
         out = out + shortcut
         out = self.relu(out)
         return out
+
+# Phase block implementing the proximal update.
+class PhaseBlock(nn.Module):
+    def __init__(self, filter_num):
+        super(PhaseBlock, self).__init__()
+        self.F = ResBlock(filter_num)
+        self.soft_threshold = SoftThreshold()
+        self.G = ResBlock(filter_num)
+
+    def forward(self, v):
+        o_forward = self.F(v)
+        o_soft = self.soft_threshold(o_forward)
+        o_next = self.G(o_soft)
+        o_forward_backward = self.G(o_forward)
+        stage_symloss = o_forward_backward - v
+        return o_next, stage_symloss
