@@ -86,3 +86,90 @@ class PhaseBlock(nn.Module):
         o_forward_backward = self.G(o_forward)
         stage_symloss = o_forward_backward - v
         return o_next, stage_symloss
+
+
+# Main network converting MBHoloNet.
+class MBHoloNet(nn.Module):
+    def __init__(self, img_rows=128, img_cols=128, img_depths=5, phase_num=9,
+                 loss_sym_param=2e-3):
+        super(MBHoloNet, self).__init__()
+        self.img_rows = img_rows # volume width
+        self.img_cols = img_cols # volume height
+        self.img_depths = img_depths # volume depth
+
+        self.phase_num = phase_num
+
+        self.loss_sym_param = loss_sym_param
+        self.filter_num = img_depths
+
+        # Create one MU layer and one phase block per iteration.
+        self.mu_layers = nn.ModuleList([MU() for _ in range(phase_num)])
+        self.phase_blocks = nn.ModuleList([PhaseBlock(self.filter_num) for _ in range(phase_num)])
+        
+        # Final normalization layers.
+        self.batch_norm = nn.BatchNorm2d(self.img_depths)
+
+    def backward_wave_prop(self, holo, otf3d):
+        """
+        Backward propagation. Propagate a 2D hologram to a 3D volume.
+        """
+        Nz = self.img_depths
+        # If otf3d is a 3D array, add a batch dimension.
+        if otf3d.dim() == 3:
+            otf3d = otf3d.unsqueeze(0)  # Now shape is (1, depth, height, width)
+        holo = holo.to(torch.complex64)
+        otf3d = otf3d.to(torch.complex64)
+        conj_otf3d = torch.conj(otf3d)
+
+        # Perform iFT(FT(O)conj(OTF))
+        holo_expand = holo.unsqueeze(1).expand(-1, Nz, -1, -1)
+        # TODO: backward ???
+        holo_expand_ft = torch.fft.fft2(holo_expand, norm="backward")
+        field3d_ft = holo_expand_ft * conj_otf3d  # Broadcast multiplication.
+        field3d = torch.fft.ifft2(field3d_ft, norm="backward")
+        vol = field3d.real  # Enforce real constraint.
+        return vol
+
+    def forward(self, holo, otf3d, return_vols: bool=False):
+        """
+        holo: tensor of shape (batch, img_rows, img_cols) [float32]
+        otf3d: tensor of shape (depth, img_rows, img_cols) if provided as a 3D array.
+        """
+        # TODO: add line for shape issues
+        otf3d = otf3d.permute(0, 3, 2, 1)
+        # Initial guess via backward propagation.
+        v_current = self.backward_wave_prop(holo, otf3d)
+        o_temp = self.backward_wave_prop(holo, otf3d)
+        loss_constraint = 0.0
+
+        if return_vols: volumes = [self.batch_norm(v_current).permute(0, 2, 3, 1)]
+        for i in range(self.phase_num):
+            # Equation 10 in paper
+
+            # numerator:  b = F( alpha * At * I_h + v)
+            mu = self.mu_layers[i]()
+            o_add_v = mu * o_temp + v_current
+            b = o_add_v.to(torch.complex64)
+            numerator = FT2d(b)
+
+            # denominator = FT(b) / (|OTF|^2 + 1)
+            otf_square = (otf3d.abs() ** 2)
+            otf_square = mu * otf_square
+            denominator = (otf_square + 1.).to(torch.complex64)
+
+            x_prime = numerator / denominator
+            v_next = iFT2d(x_prime).real
+
+            # Proximal: min_o 0.5 ||x -r||_2^2 + theta ||x||_1
+            phase_block = self.phase_blocks[i]
+            o_next, stage_symloss = phase_block(v_next)
+            v_current = o_next
+            loss_constraint += stage_symloss.pow(2).mean()
+            if return_vols: volumes.append(self.batch_norm(v_current).permute(0, 2, 3, 1))
+
+        loss_constraint = self.loss_sym_param * loss_constraint / self.phase_num
+        v_current = self.batch_norm(v_current)
+
+        v_current = v_current.permute(0, 2, 3, 1)
+        if return_vols: return v_current, loss_constraint, volumes
+        return v_current, loss_constraint
