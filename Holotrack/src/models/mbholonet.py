@@ -173,3 +173,23 @@ class MBHoloNet(nn.Module):
         v_current = v_current.permute(0, 2, 3, 1)
         if return_vols: return v_current, loss_constraint, volumes
         return v_current, loss_constraint
+
+
+# Example usage:
+if __name__ == '__main__':
+    batch_size = 2
+    img_rows, img_cols = 64, 64
+    img_depths = 64
+
+    # Dummy hologram: (batch, height, width)
+    holo = torch.randn(batch_size, img_rows, img_cols)
+    # Dummy otf3d as a 3D array: (depth, height, width)
+    otf_real = torch.randn(img_depths, img_rows, img_cols)
+    otf_imag = torch.randn(img_depths, img_rows, img_cols)
+    otf3d = torch.complex(otf_real, otf_imag)
+    print(otf3d.shape)
+
+    model = MBHoloNet(img_rows, img_cols, img_depths)
+    output, aux_loss = model(holo, otf3d)
+    print("Output shape:", output.shape)
+    print("Auxiliary loss:", aux_loss.item())
