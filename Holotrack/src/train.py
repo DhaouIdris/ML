@@ -44,3 +44,47 @@ class Trainer:
         if "neptune" in self.config:
             self.neptune_run = neptune.init_run(project=self.config["neptune"])
             self.logger.info(f"Neptune: {self.config['neptune']}")
+
+
+    def get_config_item(self, name: str):
+        args = self.config.get(name)
+        if args is None: return None, None
+        assert args is not None, f"{name} does not appear in config file"
+        name = args.get("class")
+        params = args.get("params", {})
+        return name, params
+
+    def fit(self):
+        self.train_settings()
+        self.prepare_data()
+        self.prepare_model()
+        self.configure_optimizers()
+        self.configure_metrics()
+        self.configure_callbacks()
+        self.logs_tracker = callbacks.LogsTracker(trainer=self)
+
+        if "neptune" in self.config:
+            neptune_config = {k:v if not isinstance(v, list) else "[" + ",".join(str(v)) + "]" for k,v in self.config.items()}
+            self.neptune_run["config"] = neptune_config
+
+        utils.get_summary(self)
+        self.results = {"loss": []}
+
+        self.epoch = 0
+        self.logger.info("Start of training")
+        for _ in range(self.config["epochs"]):
+            self.fit_epoch()
+            self.epoch += 1
+
+        utils.calibrate_and_plot_metrics(model=self.model, dataloader=self.train_dataloader, train=True,
+                                 device=self.device, writer=self.writer, neptune_run=getattr(self, "neptune_run", None))
+        utils.calibrate_and_plot_metrics(model=self.model, dataloader=self.eval_dataloader, train=False,
+                                 device=self.device, writer=self.writer, neptune_run=getattr(self, "neptune_run", None))
+
+
+        torch.save(self.model.state_dict(), os.path.join(self.logdir, "last-checkpoint.pt"))
+        self.logger.info("End of training")
+
+        if "neptune" in self.config:
+            self.neptune_run["logs/training"].upload(os.path.join(self.logdir, "training.log"))
+            self.neptune_run.stop()
