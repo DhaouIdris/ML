@@ -128,3 +128,40 @@ class Trainer:
             model_chkpnt_save = os.path.join(self.logdir, "best_model.pt")
             self.model_checkpoint = utils.ModelCheckpoint(self.model, model_chkpnt_save, min_is_best=True)
             self.logger.info(f"Model checkpoint: {model_chkpnt_save}")
+
+
+    def configure_optimizers(self):
+        klass_name, params = self.get_config_item(name="optimizer")
+        params = {
+            "params": self.model.parameters(),
+            **params
+        }
+        klass = getattr(optimizers, klass_name, None) # optimizers package
+        assert klass is not None, f"Class {klass_name} is not defined in optimizers"
+        self.optimizer= klass(**params)
+        self.logger.info(f"Optimizer: {self.optimizer}")
+        klass_name, params = self.get_config_item(name="lr_scheduler")
+        if klass_name is not None:
+            params = {
+                "optimizer": self.optimizer,
+                **params
+            }
+            klass = getattr(torch.optim.lr_scheduler, klass_name, None) # optimizers package
+            if klass is None:
+                klass = getattr(schedulers, klass_name, None) # optimizers package
+            self.lr_scheduler = klass(**params)
+            self.logger.info(f"Learning rate scheduler: {self.lr_scheduler}")
+
+    def configure_metrics(self):
+        names = self.config.get("metrics")
+        self.metric_funcs = {n: getattr(metrics, n, None) for n in names}
+        self.compute_metrics = lambda y_true, y_pred: {n: self.metric_funcs[n](y_true=y_true, y_pred=y_pred).item() for n in self.metric_funcs}
+
+        if self.on_train:
+            self.logger.info(f"Metrics: {self.metric_funcs}")
+
+    def configure_callbacks(self):
+        self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=th, add_cm=False)
+                            for th in [0.2, 0.4, 0.6, 0.8] ] + 
+                            [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=False)]
+        self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=True)]
