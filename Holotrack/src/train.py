@@ -90,3 +90,41 @@ class Trainer:
         if "neptune" in self.config:
             self.neptune_run["logs/training"].upload(os.path.join(self.logdir, "training.log"))
             self.neptune_run.stop()
+
+    def prepare_data(self):
+        klass_name, params = self.get_config_item(name="data")
+        klass = getattr(data, klass_name, None) # data package
+        assert klass is not None, f"Class {klass_name} is not defined in data"
+        self.data = klass(**params)
+        self.data.split()
+        self.train_dataloader = self.data.train_dataloader()
+        self.eval_dataloader = self.data.eval_dataloader()
+
+        if self.on_train:
+            self.logger.info(f"Dataset: {self.data}")
+            self.config["data"]["params"] = {**self.config["data"]["params"], **self.data.params}
+            self.logger.info(f"Train dataset size: {len(self.train_dataloader.dataset)}")
+            self.logger.info(f"Eval dataset size: {len(self.eval_dataloader.dataset)}")
+            self.logger.info(f"Train indices: {self.data.train_indices}")
+            self.logger.info(f"Eval indices: {self.data.valid_indices}")
+
+    def prepare_model(self):
+        klass_name, params = self.get_config_item(name="loss")
+        klass = getattr(nn, klass_name, None) # nn package
+        if klass is None:
+            klass = getattr(losses, klass_name, None) # nn package
+        assert klass is not None, f"Class {klass_name} is not defined in nn"
+        self.loss = klass(**params)
+
+        klass_name, params = self.get_config_item(name="model")
+        klass = getattr(models, klass_name, None) # models package
+        assert klass is not None, f"Class {klass_name} is not defined in models"
+        self.model = klass(**params).to(self.device)
+
+        if self.on_train:
+            self.logger.info(f"Loss: {self.loss}")
+            self.logger.info(f"Model:\n{self.model}")
+
+            model_chkpnt_save = os.path.join(self.logdir, "best_model.pt")
+            self.model_checkpoint = utils.ModelCheckpoint(self.model, model_chkpnt_save, min_is_best=True)
+            self.logger.info(f"Model checkpoint: {model_chkpnt_save}")
