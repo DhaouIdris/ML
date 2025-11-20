@@ -175,6 +175,10 @@ class Trainer:
             self.logger.info(f"Metrics: {self.metric_funcs}")
 
     def configure_callbacks(self):
-        # self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=th, add_cm=False)
-        #     for th in [0.2, 0.4, 0.6, 0.8] ] + [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=False)]
+        self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=th, add_cm=False)
+           for th in [0.2, 0.4, 0.6, 0.8] ] + [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=False)]
         self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=True)]
+
+    def get_pred(self, output):
+        pred = (torch.sigmoid(output) > 0.5).int()
+        return output, pred
