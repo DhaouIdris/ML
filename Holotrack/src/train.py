@@ -165,3 +165,16 @@ class Trainer:
                             for th in [0.2, 0.4, 0.6, 0.8] ] + 
                             [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=False)]
         self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=True)]
+
+    def configure_metrics(self):
+        names = self.config.get("metrics")
+        self.metric_funcs = {n: getattr(metrics, n, None) for n in names}
+        self.compute_metrics = lambda y_true, y_pred: {n: self.metric_funcs[n](y_true=y_true, y_pred=y_pred).item() for n in self.metric_funcs}
+
+        if self.on_train:
+            self.logger.info(f"Metrics: {self.metric_funcs}")
+
+    def configure_callbacks(self):
+        # self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=th, add_cm=False)
+        #     for th in [0.2, 0.4, 0.6, 0.8] ] + [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=False)]
+        self.cm_callbacks = [callbacks.BinaryMetricsCallback(trainer=self, num_classes=2, threshold=0.5, add_cm=True)]
