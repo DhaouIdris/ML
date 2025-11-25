@@ -182,3 +182,75 @@ class Trainer:
     def get_pred(self, output):
         pred = (torch.sigmoid(output) > 0.5).int()
         return output, pred
+
+    def fit_epoch(self):
+        self.model.train()
+        self.logs_tracker.on_epoch_start()
+
+        gradient_accumulation_steps=self.config.get("gradient_accumulation_steps", 1)
+        scaler = torch.cuda.amp.GradScaler(enabled=self.config.get("mixed_precision", True))
+
+        for callback in self.cm_callbacks:
+            callback.on_epoch_start()
+
+        for batch_num, batch in enumerate(self.train_dataloader):
+            batch = [a.to(self.device) for a in batch]
+            with torch.autocast(device_type='cuda', dtype=torch.float16,
+                                enabled=self.config.get("mixed_precision", True)):
+                if self.model.__class__.__name__=="MBHoloNet":
+                    otf = torch.from_numpy(self.data.get_otf()).to(self.device).unsqueeze(0).repeat(batch[0].size(0), 1, 1, 1)
+                    output, aux_loss = self.model(*batch[:-1], otf)
+                    output, pred = self.get_pred(output)
+                    loss = self.loss(output, batch[-1]) + aux_loss
+                else:
+                    output = self.model(*batch[:-1])
+                    output, pred = self.get_pred(output)
+                    loss = self.loss(output, batch[-1])
+
+                loss=loss/gradient_accumulation_steps
+
+            scaler.scale(loss).backward()
+            if (batch_num + 1) % gradient_accumulation_steps == 0 or (batch_num + 1) == len(self.train_dataloader):
+                scaler.step(self.optimizer)
+                scaler.update()
+                self.optimizer.zero_grad()
+
+            for callback in self.cm_callbacks:
+                callback.on_batch_end(y_pred=output, y_true=batch[-1], global_step=self.epoch * len(self.train_dataloader) + batch_num, train=True)
+
+            train_metrics = self.compute_metrics(y_true=batch[-1], y_pred=pred)
+            self.logs_tracker.on_batch_end(train=True, batch_num=batch_num, loss=loss, metrics=train_metrics, batch_size=batch[0].size(0))
+
+        if hasattr(self, "lr_scheduler"): self.lr_scheduler.step()
+
+        for callback in self.cm_callbacks:
+            callback.on_epoch_end(train=True)
+            callback.on_epoch_start()
+
+        self.model.eval()
+
+        for batch_num, batch in enumerate(self.eval_dataloader):
+            batch = [a.to(self.device) for a in batch]
+            with torch.no_grad():
+                if self.model.__class__.__name__=="MBHoloNet":
+                    otf = torch.from_numpy(self.data.get_otf()).to(self.device).unsqueeze(0).repeat(batch[0].size(0), 1, 1, 1)
+                    output, aux_loss = self.model(*batch[:-1], otf)
+                    output, pred = self.get_pred(output)
+                    loss = self.loss(output, batch[-1]) + aux_loss
+                    
+                else:
+                    output = self.model(*batch[:-1])
+                    output, pred = self.get_pred(output)
+                    loss = self.loss(output, batch[-1])
+
+            for callback in self.cm_callbacks:
+                callback.on_batch_end(y_pred=output, y_true=batch[-1], global_step=self.epoch * len(self.eval_dataloader) + batch_num, train=False)
+
+            eval_metrics = self.compute_metrics(y_true=batch[-1], y_pred=pred)
+            self.logs_tracker.on_batch_end(train=False, batch_num=batch_num, loss=loss, metrics=eval_metrics, batch_size=batch[0].size(0))
+
+        for callback in self.cm_callbacks:
+            callback.on_epoch_end(train=False)
+
+        self.logs_tracker.on_epoch_end()
+
