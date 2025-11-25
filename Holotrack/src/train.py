@@ -1,9 +1,14 @@
 import os
 import yaml
-import torch
 import neptune
 import logging
 import logging.config
+
+
+import torch
+import torch.nn as nn
+import torch.optim as optimizers
+from torch.utils.tensorboard import SummaryWriter
 
 # Local imports
 from src import models
