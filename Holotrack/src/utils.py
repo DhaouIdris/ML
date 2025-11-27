@@ -9,3 +9,16 @@ def visualize_angle(otf3d: np.ndarray):
     for i in range(3):
         axes[i].imshow(phase[:, :, i], cmap="gray")
     plt.show()
+
+def get_next_dir(name):
+    i = 0
+    while True:
+        name_path = name + "-" + str(i)
+        if not os.path.isdir(name_path):
+            return name_path
+        i = i + 1
+
+def get_logdir(logdir):
+    # TODO: add time
+    timestamp = datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
+    return logdir+"--"+timestamp
