@@ -181,5 +181,5 @@ class BinaryMetricsCallback(Callback):
         plt.ylabel("Actual")
         plt.title(f"Confusion Matrix - Epoch {epoch}")
         plt.tight_layout()
-        return fig
+        return fig 
 
