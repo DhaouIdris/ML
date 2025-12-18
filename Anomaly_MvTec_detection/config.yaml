@@ -1,0 +1,77 @@
+# config.yaml
+# Fichier de configuration maître pour le pipeline de détection d'anomalies MVTec AD
+# Supporte l'architecture hybride ViT + Random Forest avec Active Learning (BALD)
+
+# -----------------------------------------------------------------------------
+# 1. Configuration Système et Matériel
+# -----------------------------------------------------------------------------
+system:
+  random_seed: 42          # Fixe la graine pour la reproductibilité (numpy, torch, random)
+  device: "cuda"           # Options: "cuda" (NVIDIA), "mps" (Mac M1/M2), "cpu"
+  num_workers: 4           # Nombre de threads pour le chargement des données (DataLoader)
+  pin_memory: true         # Optimisation pour le transfert RAM -> VRAM
+
+# -----------------------------------------------------------------------------
+# 2. Configuration des Données (Dataset)
+# -----------------------------------------------------------------------------
+data:
+  dataset_name: "mvtec_ad"
+  # Chemin racine où le dataset est stocké localement.
+  # Structure attendue: root_path/category/train et root_path/category/test
+  root_path: "./data/mvtec_anomaly_detection"
+  
+  # La catégorie d'objet à analyser. 
+  # Choix possibles: bottle, cable, capsule, carpet, grid, hazelnut, leather, 
+  # metal_nut, pill, screw, tile, toothbrush, transistor, wood, zipper
+  category: "bottle"
+  
+  download: false          # Tenter de télécharger automatiquement (souvent restreint par licence)
+  
+  preprocessing:
+    image_size: 224        # Taille d'entrée du ViT (défaut: 224x224)
+    normalization:         # Normalisation standard ImageNet (requise par le ViT pré-entraîné)
+      mean: [0.5, 0.5, 0.5]
+      std: [0.5, 0.5, 0.5]
+
+# -----------------------------------------------------------------------------
+# 3. Configuration du Modèle (Architecture)
+# -----------------------------------------------------------------------------
+model:
+  feature_extractor:
+    # Identifiant Hugging Face du modèle ViT.
+    # Alternatives: "google/vit-large-patch16-224", "facebook/deit-base-distilled-patch16-224"
+    name: "google/vit-base-patch16-224"
+    use_cls_token: true    # Utiliser le token (recommandé) ou le pooling moyen (false)
+    freeze_backbone: true  # Geler les poids du ViT (Feature Extraction pure)
+
+  classifier:
+    type: "random_forest"
+    params:
+      n_estimators: 200    # Nombre d'arbres (augmenter pour une meilleure estimation d'incertitude BALD)
+      max_depth: null      # Profondeur max (null = illimité)
+      n_jobs: -1           # Utiliser tous les cœurs CPU disponibles
+      class_weight: "balanced" # Crucial pour gérer le déséquilibre (peu d'anomalies vs beaucoup de normaux)
+      criterion: "entropy" # Critère de séparation (entropy ou gini)
+
+# -----------------------------------------------------------------------------
+# 4. Paramètres d'Entraînement et Active Learning
+# -----------------------------------------------------------------------------
+training:
+  batch_size: 32           # Taille du batch pour l'extraction de features
+  test_split_ratio: 0.2    # Pourcentage de données gardées pour la validation finale
+
+active_learning:
+  enabled: true
+  strategy: "bald"         # Stratégie d'acquisition: "bald", "entropy", "random"
+  initial_labeled_size: 20 # Nombre d'images labellisées initialement (warm-start)
+  n_rounds: 10             # Nombre de cycles d'Active Learning
+  acquisition_size: 5      # Nombre d'images à labelliser par cycle (Budget par tour)
+  
+# -----------------------------------------------------------------------------
+# 5. Suivi et Sorties (Logging)
+# -----------------------------------------------------------------------------
+logging:
+  save_dir: "./runs"       # Dossier de sauvegarde des modèles et résultats
+  experiment_name: "vit_base_bald_bottle"
+  save_model: true         # Sauvegarder le classifieur final (joblib)
+  log_interval: 10         # Fréquence d'affichage des logs
