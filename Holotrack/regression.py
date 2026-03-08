@@ -81,3 +81,28 @@ if __name__ == "__main__":
     #Plot loss curve
     plt.plot(predictions, label='Predictions', color='blue')
     
+
+
+class Regression:
+    def __init__(self, learning_rate=1e-9, epsilon = 1e-4):
+        self.W = None
+        self.b = None
+        self.learning_rate = learning_rate
+        self.epsilon = epsilon
+
+    def initialize_parameters(self, n):
+        self.W = np.random(n)
+        self.b = 0
+
+    def forward(self, x):
+        return np.dot(x, self.W) + self.b
+    
+    def compute_loss(self, predictions):
+        m = len(predictions)
+
+        return np.sum(np.square(self.y-predictions)/(2*m))
+    
+    def backward(self, x):
+
+        self.dW = np.dot(x, (self.y - np.dot(self.W, x) +self.b))
+        self.db = self.y - np.dot(self.W, x) + self.b

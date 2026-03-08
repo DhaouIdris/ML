@@ -1,0 +1,89 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{enumitem}
+\usepackage{geometry}
+\geometry{margin=2cm}
+\begin{document}
+
+\begin{center}
+  \Large\bfseries Active Learning pour la détection d'appareils sur des courbes de charge\\
+  \normalsize\itshape Pré-proposition ANR
+\end{center}
+
+\vspace{0.5cm}
+
+\section*{Résumé}
+Le projet \og Active Learning pour la détection d'appareils sur des courbes de charges de consommation\fg{} vise à améliorer l’efficacité énergétique en analysant les consommations électriques des clients au niveau des usages (NILM). Il s’appuie sur le modèle CamAL (class activation maps) fondé sur des réseaux convolutifs (ResNet ensemble) pour détecter et localiser les activations d’appareils à partir de courbes de charge agrégées. Nous proposons d’intégrer des mécanismes d’apprentissage actif bayésien (MC-Dropout) pour sélectionner progressivement les échantillons les plus informatifs à annoter (fonctions d’acquisition BALD et BatchBALD). Les résultats initiaux obtenus en stage montrent que BatchBALD surpasse les approches existantes, avec des gains de +5 à +8 points de F$_1$ et environ 75\% de réduction des annotations requises. Ces performances plaident en faveur d’une désagrégation semi-supervisée personnalisable. L’implication interactive du client (par exemple validation ponctuelle de la recharge d’un véhicule électrique) permet de collecter des labels à moindre coût. Ce travail ouvre ainsi la voie à des outils NILM embarquant une boucle d’apprentissage interactif avec le client tout en limitant l’effort d’annotation.
+
+\section*{Contexte et verrous technologiques}
+La désagrégation non intrusive de charge (NILM) consiste à estimer la consommation individuelle des appareils (véhicules électriques, électroménagers, etc.) à partir du signal total mesuré au compteur principal. Elle remplace le besoin d’instrumentations multiples coûteuses et fournit des informations exploitables pour conseiller le client sur sa consommation. La littérature montre qu’une telle connaissance fine peut réduire la consommation d’un foyer de l’ordre de 10–15\%, ce qui représente un enjeu important de développement durable pour la maîtrise des usages énergétiques. Sur le plan industriel, EDF R\&D, via son projet {\it Smart Customer Data}, s’intéresse à l’analyse des courbes de charge pour proposer des conseils personnalisés et gérer la flexibilité réseau.
+
+Cependant, plusieurs \emph{verrous technologiques} entravent les méthodes NILM avancées. D’abord, la plupart des modèles supervisés basés sur le deep learning requièrent de vastes ensembles de données étiquetées, ce qui est coûteux en instrumentation ou en annotation manuelle. Ensuite, la variabilité des profils de consommation entre foyers complique la généralisation des modèles : un modèle entraîné sur un foyer peut ne pas être optimal sur un autre. Par ailleurs, la localisation temporelle fine (identifier précisément quand un appareil est allumé sur la courbe) reste difficile. Enfin, la contrainte de minimiser l’engagement du client (notifications ponctuelles uniquement) constitue une limite forte pour la collecte de labels. 
+
+L’apprentissage actif apparaît comme un moyen de lever ces verrous : en interrogeant intelligemment l’utilisateur sur les données les plus informatives, il promet de réduire drastiquement le volume d’annotations nécessaires. Par exemple, un framework d’AL pour le NILM a montré qu’avec seulement ~30\% des données sélectionnées intelligemment on atteint des performances comparables à l’entraînement complet, tout en divisant par deux l’erreur de désagrégation. De même, des méthodes AL classiques peuvent réduire jusqu’à 90\% les interventions utilisateur pour un résultat équivalent. Ce projet vise donc à tirer parti de cette approche prometteuse dans le contexte des données de consommation d’EDF.
+
+\section*{Objectifs du projet}
+Les objectifs visent à développer et valider une nouvelle chaîne NILM semi-supervisée avec apprentissage actif : 
+\begin{itemize}[left=0pt]
+  \item Mettre en œuvre et adapter le modèle CamAL existant (ResNet) en version bayésienne (MC-Dropout) afin de quantifier l’incertitude épistémique du modèle.
+  \item Définir et comparer des fonctions d’acquisition (BALD, BatchBALD, entropie, etc.) pour sélectionner les fenêtres de charge les plus informatives à annoter.
+  \item Expérimenter un protocole de boucles actives itératives : initialiser l’entraînement sur 10\% de données annotées, puis itérer requête/annotation pour enrichir le jeu d’entraînement.
+  \item Évaluer le système sur plusieurs jeux de données réelles : PanelVE (données EDF pour véhicules électriques), REFIT et UK-DALE (appareils électroménagers).
+  \item Comparer les modèles personnalisés par foyer vs. mutualisés multi-foyers pour étudier l’apport de la mutualisation des données.
+  \item Proposer à terme une interaction ciblée avec le client (ex. confirmation via application) pour valider des prédictions critiques et enrichir le modèle.
+\end{itemize}
+
+\section*{Méthodologie proposée}
+Nous développerons un pipeline complet de désagrégation NILM intégrant l’Active Learning : 
+\begin{enumerate}[left=0pt]
+  \item \textbf{Prétraitement des données :} découpage des séries temporelles en fenêtres adaptées, normalisation, et séparation temporelle des jeux (entraînement/test) tout en préservant la variabilité des usages.
+  \item \textbf{Modèle de base :} CamAL, un ensemble de réseaux ResNet entraînés pour la classification binaire (appareil ON/OFF) sur des fenêtres de signal. Un post-traitement (agrégation de class activation maps) permet la localisation temporelle des activations.
+  \item \textbf{Intégration de l’incertitude :} nous intègrerons des couches de Dropout au sein du modèle et effectuerons des inférences Monte-Carlo pour estimer la variance épistémique sur les sorties. Cela permettra d’utiliser des fonctions d’acquisition bayésiennes (BALD/BatchBALD) qui ciblent les exemples avec haute incertitude du modèle.
+  \item \textbf{Boucle d’apprentissage actif :} un protocole itératif où, à chaque itération, on entraîne le modèle sur le pool annoté actuel, on évalue l’incertitude sur le pool non annoté, puis on sélectionne les nouvelles fenêtres à annoter. L’annotation peut être simulée à partir des données étiquetées existantes (pour l’expérimentation) ou être demandée au client dans un scénario réel.
+  \item \textbf{Évaluation :} mesures classiques (précision, rappel, F$_1$-score) sur la détection et la localisation d’activations. Nous utiliserons également un score agrégé (type ELO) pour synthétiser les performances globales. L’objectif est de quantifier les gains en précision pour un coût d’annotation donné (ratio labels/performance).
+  \item \textbf{Comparaisons :} tester des stratégies contrastées : apprentissage supervisé complet (pas d’AL) versus AL aléatoire versus AL informé (BALD) ; modèle individuel par maison versus modèle mutualisé multi-maisons.
+\end{enumerate}
+
+\section*{Innovations et originalité}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+Ce projet présente plusieurs points innovants : 
+\begin{itemize}[left=0pt]
+  \item \textbf{Apprentissage actif sur NILM basse fréquence :} l’usage de l’AL (en particulier BatchBALD) dans le contexte NILM est peu exploré. Nous l’appliquons ici à des données basse fréquence (smart meters, 1-min), combinant deep learning et incertitude bayésienne.
+  \item \textbf{Combinaison de supervision faible et interactive :} le modèle CamAL permet déjà un apprentissage faible (labels par fenêtre) ; l’ajout de requêtes interactives (client) le rend véritablement adaptatif et personnalisable.
+  \item \textbf{Mutualisation multi-foyers :} nous explorerons l’intérêt de modèles partagés pour généraliser sur de nouveaux foyers, ce qui constitue un apport par rapport aux modèles purement personnalisés.
+  \item \textbf{Robustesse statistique :} nous accorderons une attention particulière à la reproductibilité (expériences répétées, pipelines fixes) et à la sensibilité des résultats (tailles de fenêtres, nombre de foyers, qualité des données).
+  \item \textbf{Focus clients et développement durable :} en centrant l’acquisition active sur l’interaction client, nous innovons sur la réduction du coût d’annotation et l’acceptabilité de la solution, tout en favorisant la sobriété énergétique, alignant ainsi la recherche sur les enjeux de durabilité.
+\end{itemize}
+
+\section*{Impact et retombées}
+\paragraph{Enjeux de développement durable et impact énergétique.}
+En retenant que le secteur résidentiel représente ~30\% de la consommation d’énergie mondiale, une réduction locale de 10--15\% via le suivi d’usage est significative. L’outil envisagé permettra aux clients de mieux connaître leur consommation par appareil, favorisant les économies d’électricité et donc la baisse des émissions de CO$_2$. Du point de vue du réseau, disposer de modèles NILM fiables améliore la prévision de charge et la flexibilité (gestion de la demande en pointe). Ces bénéfices concourent aux objectifs nationaux de transition énergétique et aux engagements d’EDF en matière de décarbonation.
+
+\paragraph{Retombées économiques.}
+Le projet crée de la valeur en réduisant les coûts liés à l’instrumentation et à l’acquisition de données. Une désagrégation NILM plus efficace peut diminuer la nécessité d’installer des compteurs dédiés, alléger les dépenses de collecte de données et ainsi générer des économies pour le fournisseur et le consommateur. Les technologies développées pourront être valorisées sous forme de services de conseil énergétique (ex. intégration dans la plateforme Mon Suivi Conso) ou de solutions logicielles commercialisables auprès d’autres acteurs (constructeurs de smart meters, énergéticiens, services de gestion d’énergie). La maîtrise de l’annotation active est aussi un avantage compétitif dans le domaine naissant de l’IA pour l’énergie.
+
+\paragraph{Retombées sociétales.}
+La sensibilisation des consommateurs aux usages énergétiques est un enjeu sociétal majeur. Ce projet encourage l’autonomie des usagers en leur fournissant un retour précis sur leurs comportements de consommation, ce qui peut conduire à des pratiques plus responsables. De plus, l’intégration d’une boucle interactive avec l’utilisateur promeut la confiance dans les outils intelligents et l’acceptabilité de solutions de smart grid. Enfin, en alignant l’innovation avec les besoins réels du client et en collaborant entre recherche et industrie, cette démarche contribue à la formation d’une main-d’œuvre qualifiée dans le domaine de la transition énergétique et du big data.
+
+\section*{Consortium et complémentarité}
+Le consortium associe CentraleSupélec et EDF R\&D, formant un duo académique/industriel complémentaire. CentraleSupélec (laboratoire L2S) apporte son expertise en apprentissage machine, IA et traitement du signal pour concevoir l’algorithme et analyser les résultats. EDF R\&D (département SEQUOIA) fournit le contexte applicatif : accès à des données réelles (PanelVE, données réseaux) et aux besoins métiers (décarbonation, services clients). Cette synergie permet d’orienter la recherche vers des solutions directement transférables. La collaboration renforcera également le transfert de connaissance (stages, doctorats, publications) entre académiques et ingénieurs d’EDF.
+
+\section*{Stratégie de valorisation}
+La stratégie de valorisation prévoit : 
+\begin{itemize}[left=0pt]
+  \item \textbf{Dis sémination scientifique :} publications dans des conférences internationales (ex. ACM e-Energy, IEEE BigData), et dépôt de code open-source pour renforcer la visibilité du projet.
+  \item \textbf{Prototypage chez EDF :} intégration des algorithmes dans une plateforme interne (p.ex. module d’analyse sur Mon Suivi Conso) pour tester en conditions réelles et préparer une éventuelle industrialisation.
+  \item \textbf{Dépôt de brevet ou logiciel :} en fonction des résultats, considérer une protection de la méthode AL spécifique NILM (consultation juridique EDF).
+  \item \textbf{Transfert vers le marché :} collaborations avec des start-up ou filiales (EDF Pulse et Start-up, SPE, etc.), ou exploitation des données NILM pour créer de nouveaux services (monitoring, maintenance prédictive).
+\end{itemize}
+
+\section*{Bibliographie}
+\begin{itemize}[left=0pt]
+  \item Xin \textsc{Jin}, \emph{An Active Learning Framework for Non-Intrusive Load Monitoring}, NREL/DOE report (2016).
+  \item D. \textsc{Patel} et al., ``Benchmarking Active Learning for NILM'', arXiv (2024).
+  \item H. \textsc{Rafiq} et al., ``A review of current methods and challenges of advanced deep learning-based NILM'', \emph{Renew. Sust. Energy Rev.} (2024).
+  \item I. \textsc{Dhaou}, ``Méthodes d’Active Learning pour la détection d’activations d’usage'' (rapport de Master, CentraleSupélec / EDF R\&D, 2025).
+\end{itemize}
+
+\end{document}
