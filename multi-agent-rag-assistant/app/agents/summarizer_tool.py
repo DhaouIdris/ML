@@ -1,4 +1,4 @@
-from list import List
+from typing import List
 
 from langchain.tools import Tool
 from langchain_core.documents import Document
