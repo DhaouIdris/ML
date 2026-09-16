@@ -1,0 +1,26 @@
+[
+  {
+    "id": "q001",
+    "question": "REPLACE_WITH_A_QUESTION_GROUNDED_IN_YOUR_PDFS",
+    "expected_answer": "REPLACE_WITH_THE_REFERENCE_ANSWER",
+    "relevant_evidence": [
+      "REPLACE_WITH_AN_EXACT_SHORT_EVIDENCE_SNIPPET_FROM_THE_SOURCE"
+    ],
+    "source": {
+      "filename": "REPLACE_WITH_SOURCE.pdf",
+      "page": null
+    }
+  },
+  {
+    "id": "q002",
+    "question": "REPLACE_WITH_A_SECOND_REALISTIC_QUESTION",
+    "expected_answer": "REPLACE_WITH_THE_REFERENCE_ANSWER",
+    "relevant_evidence": [
+      "REPLACE_WITH_AN_EXACT_SHORT_EVIDENCE_SNIPPET_FROM_THE_SOURCE"
+    ],
+    "source": {
+      "filename": "REPLACE_WITH_SOURCE.pdf",
+      "page": null
+    }
+  }
+]
